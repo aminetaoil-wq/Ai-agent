@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Klantenservice — StoneLinked</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- Header (zelfde stijl als stonelinked.com) -->
+  <header class="site-header">
+    <div class="logo-mark">S</div>
+    <div class="brand-name">Stone<span>Linked</span></div>
+  </header>
+
+  <!-- Informatiestrip -->
+  <div class="hero-strip">
+    QR-gedenktekens · Handgemaakt in Nederland · Levenslange hosting
+  </div>
+
+  <!-- Hoofdinhoud -->
+  <main class="main">
+
+    <div class="page-title">
+      <h1>Houd hun verhaal <em>levend.</em></h1>
+      <p>Ons team staat voor u klaar. Stel uw vraag hieronder.</p>
+    </div>
+
+    <!-- Chatvenster -->
+    <div class="chat-container">
+
+      <div class="chat-header">
+        <div class="status-dot"></div>
+        <div>
+          <div class="title">StoneLinked Klantenservice</div>
+          <div class="subtitle">Powered by AI · Altijd beschikbaar</div>
+        </div>
+      </div>
+
+      <div class="messages" id="messages">
+        <div class="welcome-msg">
+          <div class="welcome-icon">🕊️</div>
+          <p>Welkom bij StoneLinked. Hoe kunnen we u helpen?</p>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <textarea
+          id="chat-input"
+          rows="1"
+          placeholder="Stel uw vraag…"
+          aria-label="Typ uw vraag"
+        ></textarea>
+        <button class="send-btn" id="send-btn" aria-label="Verstuur">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Suggesties -->
+    <div class="suggestions" id="suggestions">
+      <p>Veelgestelde vragen</p>
+      <button class="suggestion-btn" data-msg="Wat zijn de verschillen tussen de pakketten?">
+        Pakketvergelijking
+      </button>
+      <button class="suggestion-btn" data-msg="Hoe snel wordt mijn bestelling geleverd?">
+        Levertijd
+      </button>
+      <button class="suggestion-btn" data-msg="Hoe upload ik foto's op de gedenkpagina?">
+        Foto's uploaden
+      </button>
+      <button class="suggestion-btn" data-msg="Ik ben uitvaartondernemer, hoe werkt het partnerschap?">
+        Partnerschap
+      </button>
+      <button class="suggestion-btn" data-msg="Wat kost het Eeuwige Herinnering pakket?">
+        Prijzen
+      </button>
+    </div>
+
+  </main>
+
+  <footer>
+    &copy; 2024 StoneLinked · <a href="https://stonelinked.com" style="color:inherit">stonelinked.com</a>
+    · info@stonelinked.com
+  </footer>
+
+  <script src="/static/chat.js"></script>
+</body>
+</html>

@@ -1,149 +1,150 @@
 """
-SPECIALIST_TOOLS: tool schemas passed to the orchestrator so Claude can
-route customer queries to the appropriate specialist agent via tool_use.
+SPECIALIST_TOOLS: tool schemas voor de orchestrator zodat Claude klanten
+kan doorsturen naar de juiste StoneLinked specialist via tool_use.
 """
 
 SPECIALIST_TOOLS: list[dict] = [
     {
-        "name": "billing_agent",
+        "name": "pakket_adviseur",
         "description": (
-            "Handles all billing-related issues: payment failures, invoice questions, "
-            "subscription changes (upgrades, downgrades, cancellations), refund eligibility, "
-            "duplicate or unexpected charges, and account credits. "
-            "Call this when the customer mentions payments, invoices, charges, subscriptions, "
-            "or billing statements."
+            "Helpt klanten het juiste herdenkingspakket kiezen. Behandelt vragen over "
+            "de drie pakketten: Het Anker (€195), De Ceremonie (€365) en Eeuwige Herinnering (€595). "
+            "Vergelijkt inhoud, prijzen en geeft persoonlijk advies. "
+            "Roep dit aan wanneer de klant vraagt welk pakket past bij hun situatie, "
+            "wat er inbegrepen is, of wat de prijzen zijn."
         ),
         "input_schema": {
             "type": "object",
             "properties": {
-                "customer_query": {
+                "klant_vraag": {
                     "type": "string",
-                    "description": (
-                        "The specific billing question or issue from the customer, "
-                        "verbatim or closely paraphrased."
-                    ),
+                    "description": "De specifieke paketvraag of situatie van de klant.",
                 },
                 "context": {
                     "type": "string",
                     "description": (
-                        "Any relevant context from earlier in the conversation "
-                        "(account email, last 4 digits of card, subscription plan, etc.)."
+                        "Relevante context uit het gesprek: bijv. of de uitvaart al geweest is, "
+                        "hoeveel mensen er worden verwacht, het budget."
                     ),
                 },
             },
-            "required": ["customer_query"],
+            "required": ["klant_vraag"],
         },
     },
     {
-        "name": "technical_support_agent",
+        "name": "bestelling_agent",
         "description": (
-            "Handles technical problems: software bugs, app crashes, login issues, "
-            "authentication errors, configuration questions, API integration errors, "
-            "and how-to guidance for product features. "
-            "Call this for any technical troubleshooting or product usage request."
+            "Behandelt vragen over bestellingen, betaling en levering. "
+            "Roep dit aan wanneer de klant vraagt over: een bestelling plaatsen, "
+            "betaalmethoden, levertijden, orderstatus, facturen, wijzigen of annuleren van een bestelling."
         ),
         "input_schema": {
             "type": "object",
             "properties": {
-                "customer_query": {
+                "klant_vraag": {
                     "type": "string",
-                    "description": "The technical issue or question from the customer.",
+                    "description": "De bestelling- of leveringsvraag van de klant.",
+                },
+                "bestelnummer": {
+                    "type": "string",
+                    "description": "Het bestelnummer als de klant dit heeft opgegeven.",
+                },
+                "context": {
+                    "type": "string",
+                    "description": "Aanvullende context: gekozen pakket, leveradres, urgentie.",
+                },
+            },
+            "required": ["klant_vraag"],
+        },
+    },
+    {
+        "name": "gedenkpagina_agent",
+        "description": (
+            "Helpt klanten met de digitale gedenkpagina en QR-tag. "
+            "Roep dit aan voor vragen over: pagina aanmaken, foto's of video's uploaden, "
+            "QR-tag activeren of testen, privacyinstellingen, gastenboek beheren, "
+            "de pagina delen met familie, of technische problemen met de pagina."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "klant_vraag": {
+                    "type": "string",
+                    "description": "De vraag over de gedenkpagina of QR-tag.",
                 },
                 "context": {
                     "type": "string",
                     "description": (
-                        "Relevant technical context if mentioned: OS, app version, "
-                        "device type, error message text, steps already tried."
+                        "Technische context: apparaat (iPhone/Android/PC), "
+                        "welke stap mislukt, foutmelding die de klant ziet."
                     ),
                 },
             },
-            "required": ["customer_query"],
+            "required": ["klant_vraag"],
         },
     },
     {
-        "name": "returns_agent",
+        "name": "partner_agent",
         "description": (
-            "Handles returns, refunds, exchanges, and order fulfillment. "
-            "Call this when the customer wants to return a product, check a refund status, "
-            "exchange an item, track an order, or report a missing/damaged shipment."
+            "Informeert over het partnerschap-programma voor uitvaartondernemers, "
+            "begraafplaatsen, grafsteenhandelaren en zorginstellingen. "
+            "Roep dit aan wanneer de klant aangeeft een bedrijf te vertegenwoordigen "
+            "of vraagt naar samenwerking, reseller-mogelijkheden of het partnerportaal."
         ),
         "input_schema": {
             "type": "object",
             "properties": {
-                "customer_query": {
+                "klant_vraag": {
                     "type": "string",
-                    "description": "The return, refund, or order-related request from the customer.",
-                },
-                "order_id": {
-                    "type": "string",
-                    "description": "Order ID if the customer provided one.",
+                    "description": "De vraag over het partnerschap of samenwerking.",
                 },
                 "context": {
                     "type": "string",
                     "description": (
-                        "Additional context: purchase date, item description, "
-                        "reason for return, delivery status."
+                        "Type bedrijf van de klant (bijv. uitvaartondernemer, begraafplaats), "
+                        "regio of grootte van het bedrijf."
                     ),
                 },
             },
-            "required": ["customer_query"],
+            "required": ["klant_vraag"],
         },
     },
     {
-        "name": "faq_agent",
+        "name": "escalatie_agent",
         "description": (
-            "Answers general informational questions about products, policies, features, "
-            "pricing plans, hours of operation, company information, and promotions. "
-            "Call this for questions that don't require account-specific data or actions."
+            "Escaleert naar een menselijke medewerker van StoneLinked en maakt een supportticket aan. "
+            "Roep dit aan wanneer: (1) de klant erg verdrietig of overstuur is en extra menselijke zorg nodig heeft, "
+            "(2) er een spoedsituatie is (uitvaart binnen 24-48 uur), "
+            "(3) een klacht niet is opgelost door andere specialisten, "
+            "(4) er een uitzondering op het beleid nodig is."
         ),
         "input_schema": {
             "type": "object",
             "properties": {
-                "customer_query": {
+                "klant_vraag": {
                     "type": "string",
-                    "description": "The general question from the customer.",
+                    "description": "Samenvatting van het onopgeloste probleem of de gevoelige situatie.",
                 },
-            },
-            "required": ["customer_query"],
-        },
-    },
-    {
-        "name": "escalation_agent",
-        "description": (
-            "Escalates unresolved or complex issues to a human support agent and creates "
-            "a support ticket. Call this when: (1) the customer is very frustrated or upset, "
-            "(2) the issue requires human judgment or access to internal systems, "
-            "(3) previous specialist interactions did not resolve the issue, "
-            "(4) the issue involves legal, compliance, or safety concerns."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "customer_query": {
+                "reden_escalatie": {
                     "type": "string",
-                    "description": "Summary of the unresolved issue.",
+                    "description": "Waarom menselijke opvolging nodig is.",
                 },
-                "reason_for_escalation": {
+                "gesprek_samenvatting": {
                     "type": "string",
-                    "description": "Why this issue requires human escalation.",
+                    "description": "Korte samenvatting van het gesprek tot nu toe.",
                 },
-                "conversation_summary": {
+                "prioriteit": {
                     "type": "string",
+                    "enum": ["laag", "middel", "hoog", "spoed"],
                     "description": (
-                        "A brief summary of the conversation so far, "
-                        "including what was already tried."
-                    ),
-                },
-                "priority": {
-                    "type": "string",
-                    "enum": ["low", "medium", "high", "urgent"],
-                    "description": (
-                        "Priority: urgent=safety/legal, high=financial impact or very frustrated, "
-                        "medium=unresolved after multiple attempts, low=preference/exception request."
+                        "spoed = uitvaart binnen 24-48 uur, "
+                        "hoog = klacht of financieel probleem, "
+                        "middel = onopgelost na meerdere pogingen, "
+                        "laag = voorkeur of beleidsuitzondering."
                     ),
                 },
             },
-            "required": ["customer_query", "reason_for_escalation"],
+            "required": ["klant_vraag", "reden_escalatie"],
         },
     },
 ]

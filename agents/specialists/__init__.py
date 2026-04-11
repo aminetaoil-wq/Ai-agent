@@ -1,13 +1,13 @@
-from agents.specialists.billing import BillingAgent
-from agents.specialists.technical_support import TechnicalSupportAgent
-from agents.specialists.returns import ReturnsAgent
-from agents.specialists.faq import FAQAgent
-from agents.specialists.escalation import EscalationAgent
+from agents.specialists.pakket_adviseur import PakketAdviseur
+from agents.specialists.bestelling import BestellingAgent
+from agents.specialists.gedenkpagina import GedenkpaginaAgent
+from agents.specialists.partner import PartnerAgent
+from agents.specialists.escalatie import EscalatieAgent
 
 __all__ = [
-    "BillingAgent",
-    "TechnicalSupportAgent",
-    "ReturnsAgent",
-    "FAQAgent",
-    "EscalationAgent",
+    "PakketAdviseur",
+    "BestellingAgent",
+    "GedenkpaginaAgent",
+    "PartnerAgent",
+    "EscalatieAgent",
 ]
