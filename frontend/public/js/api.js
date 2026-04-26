@@ -99,4 +99,7 @@
     sendMessage: (jobId, content) => json('POST')('/jobs/' + encodeURIComponent(jobId) + '/messages', { content }),
     createReview: (jobId, body) => json('POST')('/jobs/' + encodeURIComponent(jobId) + '/reviews', body),
   };
+
+  const KR = (window.KR = window.KR || {});
+  KR.API = window.API;
 })();

@@ -65,5 +65,8 @@
   };
 
   Store.load();
+  const KR = (window.KR = window.KR || {});
+  KR.Store = Store;
+  // Back-compat: existing call sites use `window.Store`.
   window.Store = Store;
 })();

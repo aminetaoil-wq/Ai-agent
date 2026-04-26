@@ -4,21 +4,21 @@ import * as service from './jobs.service';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { validate } from '../../middleware/validate';
 import { requireAuth, requireRole } from '../../middleware/auth';
+import { param } from '../../utils/params';
 import {
   createJobSchema,
-  createReviewSchema,
   idParamSchema,
   listJobsQuerySchema,
-  sendMessageSchema,
   updateJobSchema,
 } from './jobs.schemas';
+import { messagesRouter } from '../messages/messages.routes';
+import { reviewsRouter } from '../reviews/reviews.routes';
 
 export const jobsRouter = Router();
 
-// All endpoints require auth.
+// All endpoints below require auth.
 jobsRouter.use(requireAuth);
 
-// CLIENT: post a new job.
 jobsRouter.post(
   '/',
   requireRole(Role.CLIENT),
@@ -29,7 +29,6 @@ jobsRouter.post(
   }),
 );
 
-// CRAFTSMAN: open feed.
 jobsRouter.get(
   '/',
   requireRole(Role.CRAFTSMAN),
@@ -40,7 +39,8 @@ jobsRouter.get(
   }),
 );
 
-// USER: my jobs (semantics depend on role).
+// `/me` is intentionally registered before `/:id` so it doesn't get matched
+// as an id.
 jobsRouter.get(
   '/me',
   asyncHandler(async (req, res) => {
@@ -53,7 +53,7 @@ jobsRouter.get(
   '/:id',
   validate(idParamSchema, 'params'),
   asyncHandler(async (req, res) => {
-    const job = await service.getJob(req.params.id!, req.user!.id, req.user!.role);
+    const job = await service.getJob(param(req, 'id'), req.user!.id, req.user!.role);
     res.json({ job });
   }),
 );
@@ -64,7 +64,7 @@ jobsRouter.patch(
   validate(idParamSchema, 'params'),
   validate(updateJobSchema),
   asyncHandler(async (req, res) => {
-    const job = await service.updateJob(req.user!.id, req.params.id!, req.body);
+    const job = await service.updateJob(req.user!.id, param(req, 'id'), req.body);
     res.json({ job });
   }),
 );
@@ -74,7 +74,7 @@ jobsRouter.post(
   requireRole(Role.CRAFTSMAN),
   validate(idParamSchema, 'params'),
   asyncHandler(async (req, res) => {
-    const job = await service.acceptJob(req.params.id!, req.user!.id);
+    const job = await service.acceptJob(param(req, 'id'), req.user!.id);
     res.json({ job });
   }),
 );
@@ -84,7 +84,7 @@ jobsRouter.post(
   requireRole(Role.CRAFTSMAN),
   validate(idParamSchema, 'params'),
   asyncHandler(async (req, res) => {
-    const job = await service.startJob(req.params.id!, req.user!.id);
+    const job = await service.startJob(param(req, 'id'), req.user!.id);
     res.json({ job });
   }),
 );
@@ -94,7 +94,7 @@ jobsRouter.post(
   requireRole(Role.CRAFTSMAN),
   validate(idParamSchema, 'params'),
   asyncHandler(async (req, res) => {
-    const job = await service.completeJob(req.params.id!, req.user!.id);
+    const job = await service.completeJob(param(req, 'id'), req.user!.id);
     res.json({ job });
   }),
 );
@@ -104,43 +104,11 @@ jobsRouter.post(
   requireRole(Role.CLIENT),
   validate(idParamSchema, 'params'),
   asyncHandler(async (req, res) => {
-    const job = await service.cancelJob(req.params.id!, req.user!.id);
+    const job = await service.cancelJob(param(req, 'id'), req.user!.id);
     res.json({ job });
   }),
 );
 
-// Messages live under the job (chat thread is scoped to a job).
-jobsRouter.get(
-  '/:id/messages',
-  validate(idParamSchema, 'params'),
-  asyncHandler(async (req, res) => {
-    const messages = await service.listMessages(req.params.id!, req.user!.id);
-    res.json({ messages });
-  }),
-);
-
-jobsRouter.post(
-  '/:id/messages',
-  validate(idParamSchema, 'params'),
-  validate(sendMessageSchema),
-  asyncHandler(async (req, res) => {
-    const message = await service.sendMessage(req.params.id!, req.user!.id, req.body.content);
-    res.status(201).json({ message });
-  }),
-);
-
-// Reviews are also nested under jobs.
-jobsRouter.post(
-  '/:id/reviews',
-  validate(idParamSchema, 'params'),
-  validate(createReviewSchema),
-  asyncHandler(async (req, res) => {
-    const review = await service.createReview(
-      req.params.id!,
-      req.user!.id,
-      req.body.rating,
-      req.body.comment,
-    );
-    res.status(201).json({ review });
-  }),
-);
+// Sub-resources mounted as nested routers (URLs unchanged).
+jobsRouter.use('/:id/messages', validate(idParamSchema, 'params'), messagesRouter);
+jobsRouter.use('/:id/reviews', validate(idParamSchema, 'params'), reviewsRouter);

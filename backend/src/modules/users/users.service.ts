@@ -1,15 +1,14 @@
 import { prisma } from '../../config/prisma';
 import { AppError } from '../../utils/AppError';
+import { PUBLIC_USER_SELECT } from './users.selectors';
 import type { UpdateCraftsmanInput, UpdateMeInput } from './users.schemas';
 
-export const updateMe = async (userId: string, input: UpdateMeInput) => {
-  const user = await prisma.user.update({
+export const updateMe = async (userId: string, input: UpdateMeInput) =>
+  prisma.user.update({
     where: { id: userId },
     data: input,
-    select: { id: true, email: true, name: true, role: true, phone: true, avatarUrl: true },
+    select: PUBLIC_USER_SELECT,
   });
-  return user;
-};
 
 export const updateCraftsmanProfile = async (userId: string, input: UpdateCraftsmanInput) => {
   const profile = await prisma.craftsmanProfile.findUnique({ where: { userId } });
@@ -59,7 +58,13 @@ export const getPublicProfile = async (userId: string) => {
         },
       },
       reviewsReceived: {
-        select: { id: true, rating: true, comment: true, createdAt: true, from: { select: { id: true, name: true } } },
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+          from: { select: { id: true, name: true } },
+        },
         orderBy: { createdAt: 'desc' },
         take: 20,
       },

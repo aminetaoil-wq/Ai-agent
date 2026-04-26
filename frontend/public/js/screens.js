@@ -1,84 +1,12 @@
-// Screen handlers. Each handler is responsible for populating its own DOM
-// when the user enters that screen. They share helpers from this IIFE.
+// Per-screen render + form handlers. Pure orchestration — all DOM helpers
+// live in utils.js. Side-effects (polling) are tracked so we can clean up
+// when the user navigates away or backgrounds the tab.
 (function () {
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const { escape, fmtMoney, fmtDate, initials, toast, jobCard, STATUS_LABELS, STATUS_BADGE } = window.KR.utils;
 
-  const STATUS_LABELS = {
-    OPEN: 'Open',
-    ASSIGNED: 'Toegewezen',
-    IN_PROGRESS: 'Bezig',
-    COMPLETED: 'Afgerond',
-    CANCELLED: 'Geannuleerd',
-  };
-  const STATUS_BADGE = {
-    OPEN: 'bo',
-    ASSIGNED: 'bb',
-    IN_PROGRESS: 'bb',
-    COMPLETED: 'bg',
-    CANCELLED: 'bx',
-  };
-
-  const escape = (str = '') =>
-    String(str).replace(/[&<>"']/g, (m) => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;',
-    })[m]);
-
-  const fmtMoney = (cents) => {
-    if (cents == null) return '—';
-    return '€' + (cents / 100).toFixed(2);
-  };
-
-  const fmtDate = (d) =>
-    new Intl.DateTimeFormat('nl-NL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(
-      new Date(d),
-    );
-
-  const initials = (name = '') =>
-    name
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((w) => w[0].toUpperCase())
-      .join('') || '?';
-
-  function toast(msg, isError = false) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.toggle('err', !!isError);
-    el.classList.add('on');
-    clearTimeout(toast._t);
-    toast._t = setTimeout(() => el.classList.remove('on'), 2400);
-  }
-  window.toast = toast;
-
-  function jobCard(job, { showActions = true } = {}) {
-    const status = STATUS_LABELS[job.status] || job.status;
-    const cls = STATUS_BADGE[job.status] || 'bx';
-    return `
-      <div class="kc card-hover" data-job-id="${escape(job.id)}">
-        <div class="kch flex jb ac g8">
-          <span class="badge ${cls}">${escape(status)}</span>
-          <span class="xs">${escape(fmtDate(job.createdAt))}</span>
-        </div>
-        <div class="kcb">
-          <h3 class="h4">${escape(job.title)}</h3>
-          <p class="sm mt4">${escape(job.category?.name || '')} · ${escape(job.city)}</p>
-          <p class="sm mt8">${escape(job.description.slice(0, 120))}${job.description.length > 120 ? '…' : ''}</p>
-        </div>
-        <div class="kcf">
-          <span class="xs">${escape(fmtMoney(job.budgetCents))}</span>
-          ${showActions ? `<button class="btn btn-ghost btn-sm">Bekijk →</button>` : ''}
-        </div>
-      </div>
-    `;
-  }
-
-  /* -------------------- HOME / AUTH -------------------- */
+  /* -------------------- AUTH -------------------- */
 
   let currentRole = 'CLIENT';
 
@@ -181,11 +109,9 @@
       const { jobs } = await window.API.listMyJobs();
       const recent = jobs.slice(0, 5);
       const list = $('#dash-recent');
-      if (recent.length === 0) {
-        list.innerHTML = '<div class="empty">Nog geen klussen.</div>';
-      } else {
-        list.innerHTML = recent.map((j) => jobCard(j)).join('');
-      }
+      list.innerHTML = recent.length === 0
+        ? '<div class="empty">Nog geen klussen.</div>'
+        : recent.map((j) => jobCard(j)).join('');
     } catch (err) {
       $('#dash-recent').innerHTML = `<p class="sm">${escape(err.message)}</p>`;
     }
@@ -250,7 +176,7 @@
       try {
         const { categories } = await window.API.listCategories();
         window.Store.categories = categories;
-      } catch (_) { /* ignore */ }
+      } catch (_) { /* offline ok */ }
     }
     sel.innerHTML = window.Store.categories
       .map((c) => `<option value="${escape(c.id)}">${escape(c.icon || '')} ${escape(c.name)}</option>`)
@@ -301,19 +227,19 @@
 
       const actions = [];
       if (job.status === 'OPEN' && window.Store.isCraftsman()) {
-        actions.push(`<button class="btn btn-primary btn-full" data-act="accept">Klus accepteren</button>`);
+        actions.push('<button class="btn btn-primary btn-full" data-act="accept">Klus accepteren</button>');
       }
       if (job.status === 'ASSIGNED' && isAssignedCraftsman) {
-        actions.push(`<button class="btn btn-primary btn-full" data-act="start">Start klus</button>`);
+        actions.push('<button class="btn btn-primary btn-full" data-act="start">Start klus</button>');
       }
       if (job.status === 'IN_PROGRESS' && isAssignedCraftsman) {
-        actions.push(`<button class="btn btn-success btn-full" data-act="complete">Markeer afgerond</button>`);
+        actions.push('<button class="btn btn-success btn-full" data-act="complete">Markeer afgerond</button>');
       }
       if (isClient && (job.status === 'OPEN' || job.status === 'ASSIGNED' || job.status === 'IN_PROGRESS')) {
-        actions.push(`<button class="btn btn-danger btn-full" data-act="cancel">Annuleer klus</button>`);
+        actions.push('<button class="btn btn-danger btn-full" data-act="cancel">Annuleer klus</button>');
       }
       if (job.assignment && (isClient || isAssignedCraftsman)) {
-        actions.unshift(`<button class="btn btn-secondary btn-full" data-act="chat">💬 Chat openen</button>`);
+        actions.unshift('<button class="btn btn-secondary btn-full" data-act="chat">💬 Chat openen</button>');
       }
       if (job.status === 'COMPLETED' && (isClient || isAssignedCraftsman)) {
         actions.push(`
@@ -408,9 +334,30 @@
     }
   }
 
-  /* -------------------- CHAT -------------------- */
-
+  /* -------------------- CHAT --------------------
+   * Polling lifecycle: started on screen entry, stopped on screen leave AND
+   * when the tab is backgrounded. We resume on visibility return.
+   */
+  const POLL_MS = 4000;
   let chatPoll = null;
+  let chatRefresh = null;
+
+  function startChatPolling() {
+    if (chatPoll || !chatRefresh) return;
+    chatPoll = setInterval(chatRefresh, POLL_MS);
+  }
+  function stopChatPolling() {
+    if (chatPoll) {
+      clearInterval(chatPoll);
+      chatPoll = null;
+    }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (window.Router.current !== 'sc-chat') return;
+    if (document.hidden) stopChatPolling();
+    else startChatPolling();
+  });
 
   async function renderChat() {
     const id = window.Store.currentJobId;
@@ -420,7 +367,7 @@
       return;
     }
 
-    async function refresh() {
+    chatRefresh = async function refresh() {
       try {
         const { messages } = await window.API.listMessages(id);
         thread.innerHTML = messages
@@ -439,11 +386,11 @@
       } catch (err) {
         thread.innerHTML = `<div class="empty">${escape(err.message)}</div>`;
       }
-    }
+    };
 
-    await refresh();
-    clearInterval(chatPoll);
-    chatPoll = setInterval(refresh, 4000);
+    await chatRefresh();
+    stopChatPolling();
+    startChatPolling();
 
     $('#chat-form').onsubmit = async (e) => {
       e.preventDefault();
@@ -453,7 +400,7 @@
       input.value = '';
       try {
         await window.API.sendMessage(id, content);
-        await refresh();
+        await chatRefresh();
       } catch (err) {
         toast(err.message || 'Versturen mislukt', true);
       }
@@ -461,8 +408,8 @@
   }
 
   function leaveChat() {
-    clearInterval(chatPoll);
-    chatPoll = null;
+    stopChatPolling();
+    chatRefresh = null;
   }
 
   /* -------------------- PROFILE -------------------- */
@@ -471,6 +418,18 @@
     const body = $('#profile-body');
     const u = window.Store.user;
     if (!u) return;
+
+    // Pull a fresh profile so we can pre-fill the craftsman form. The
+    // earlier version rendered empty inputs even when the user already had
+    // data on file.
+    let profile = null;
+    if (u.role === 'CRAFTSMAN') {
+      try {
+        const { user } = await window.API.me();
+        window.Store.setUser(user);
+        profile = user.craftsmanProfile || null;
+      } catch (_) { /* keep going */ }
+    }
 
     body.innerHTML = `
       <div class="flex ac g12">
@@ -500,19 +459,21 @@
               <div class="sec-label">Vakman-profiel</div>
               <div class="fg mt8">
                 <label>KvK</label>
-                <input type="text" name="kvkNumber" />
+                <input type="text" name="kvkNumber" value="${escape(profile?.kvkNumber || '')}" />
               </div>
               <div class="fg mt8">
                 <label>Stad</label>
-                <input type="text" name="city" />
+                <input type="text" name="city" value="${escape(profile?.city || '')}" />
               </div>
               <div class="fg mt8">
                 <label>Uurtarief (€)</label>
-                <input type="number" name="hourlyRateEuro" min="0" step="1" />
+                <input type="number" name="hourlyRateEuro" min="0" step="1" value="${
+                  profile?.hourlyRate != null ? (profile.hourlyRate / 100).toFixed(0) : ''
+                }" />
               </div>
               <div class="fg mt8">
                 <label>Bio</label>
-                <textarea name="bio" rows="3" placeholder="Vertel iets over jezelf"></textarea>
+                <textarea name="bio" rows="3" placeholder="Vertel iets over jezelf">${escape(profile?.bio || '')}</textarea>
               </div>
               <button class="btn btn-primary btn-full mt12" type="submit">Profiel bijwerken</button>
             </form>`
@@ -569,19 +530,24 @@
     }
   });
 
-  // Listen for screen entries to (re)hydrate.
+  // Per-screen entry hooks. Centralised so adding a new screen is a single
+  // map entry instead of a new branch in an if/else chain.
+  const ENTER_HOOKS = {
+    'sc-dash': renderDashboard,
+    'sc-jobs': renderJobs,
+    'sc-new': renderNewJob,
+    'sc-job': renderJob,
+    'sc-chat': renderChat,
+    'sc-profile': renderProfile,
+  };
+
   window.addEventListener('screen:enter', (e) => {
     const id = e.detail.id;
     if (id !== 'sc-chat') leaveChat();
-    if (id === 'sc-dash') renderDashboard();
-    else if (id === 'sc-jobs') renderJobs();
-    else if (id === 'sc-new') renderNewJob();
-    else if (id === 'sc-job') renderJob();
-    else if (id === 'sc-chat') renderChat();
-    else if (id === 'sc-profile') renderProfile();
+    const hook = ENTER_HOOKS[id];
+    if (hook) hook();
   });
 
-  // Bind static auth screen once on load.
   document.addEventListener('DOMContentLoaded', () => {
     bindAuth();
     bindNewJob();

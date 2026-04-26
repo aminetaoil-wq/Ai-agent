@@ -21,14 +21,6 @@ export const listJobsQuerySchema = z.object({
   cursor: z.string().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
-
-export const sendMessageSchema = z.object({
-  content: z.string().min(1).max(2000).trim(),
-});
-
-export const createReviewSchema = z.object({
-  rating: z.coerce.number().int().min(1).max(5),
-  comment: z.string().max(1000).optional(),
-});
+export type ListJobsQuery = z.infer<typeof listJobsQuerySchema>;
 
 export const idParamSchema = z.object({ id: z.string().min(1) });

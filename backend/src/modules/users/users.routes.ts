@@ -5,6 +5,7 @@ import * as service from './users.service';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { validate } from '../../middleware/validate';
 import { requireAuth, requireRole } from '../../middleware/auth';
+import { param } from '../../utils/params';
 import { updateCraftsmanSchema, updateMeSchema } from './users.schemas';
 
 export const usersRouter = Router();
@@ -36,7 +37,7 @@ usersRouter.get(
   '/:id',
   validate(idParam, 'params'),
   asyncHandler(async (req, res) => {
-    const user = await service.getPublicProfile(req.params.id!);
+    const user = await service.getPublicProfile(param(req, 'id'));
     res.json({ user });
   }),
 );
@@ -45,9 +46,7 @@ usersRouter.get(
   '/:id/reviews',
   validate(idParam, 'params'),
   asyncHandler(async (req, res) => {
-    // Reviews are returned within getPublicProfile; this dedicated endpoint
-    // exists for paginated browsing later.
-    const user = await service.getPublicProfile(req.params.id!);
+    const user = await service.getPublicProfile(param(req, 'id'));
     res.json({ reviews: user.reviewsReceived });
   }),
 );

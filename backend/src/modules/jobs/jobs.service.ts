@@ -1,18 +1,8 @@
 import { JobStatus, NotificationType, Prisma, Role } from '@prisma/client';
 import { prisma } from '../../config/prisma';
 import { AppError } from '../../utils/AppError';
-import type {
-  CreateJobInput,
-  UpdateJobInput,
-} from './jobs.schemas';
-
-const JOB_INCLUDE = {
-  category: true,
-  client: { select: { id: true, name: true, avatarUrl: true } },
-  assignment: {
-    include: { craftsman: { select: { id: true, name: true, avatarUrl: true } } },
-  },
-} satisfies Prisma.JobInclude;
+import { JOB_INCLUDE } from './jobs.selectors';
+import type { CreateJobInput, ListJobsQuery, UpdateJobInput } from './jobs.schemas';
 
 const notify = (
   tx: Prisma.TransactionClient,
@@ -41,12 +31,7 @@ export const updateJob = async (clientId: string, jobId: string, input: UpdateJo
   return prisma.job.update({ where: { id: jobId }, data: input, include: JOB_INCLUDE });
 };
 
-export const listOpenJobs = async (params: {
-  categoryId?: string;
-  city?: string;
-  cursor?: string;
-  limit: number;
-}) => {
+export const listOpenJobs = async (params: ListJobsQuery) => {
   const where: Prisma.JobWhereInput = {
     status: JobStatus.OPEN,
     ...(params.categoryId && { categoryId: params.categoryId }),
@@ -66,29 +51,22 @@ export const listOpenJobs = async (params: {
   return { items: trimmed, nextCursor: hasMore ? trimmed[trimmed.length - 1]!.id : null };
 };
 
+// Capped to keep the response bounded even before we add proper pagination
+// for the "my jobs" view.
+const MY_JOBS_LIMIT = 100;
+
 export const listMyJobs = async (userId: string, role: Role) => {
-  if (role === Role.CLIENT) {
-    return prisma.job.findMany({
-      where: { clientId: userId },
-      include: JOB_INCLUDE,
-      orderBy: { createdAt: 'desc' },
-    });
-  }
+  const where: Prisma.JobWhereInput =
+    role === Role.CLIENT
+      ? { clientId: userId }
+      : { assignment: { craftsmanId: userId } };
+
   return prisma.job.findMany({
-    where: { assignment: { craftsmanId: userId } },
+    where,
     include: JOB_INCLUDE,
     orderBy: { createdAt: 'desc' },
+    take: MY_JOBS_LIMIT,
   });
-};
-
-const assertParticipant = (
-  job: Prisma.JobGetPayload<{ include: typeof JOB_INCLUDE }>,
-  userId: string,
-) => {
-  const isClient = job.clientId === userId;
-  const isCraftsman = job.assignment?.craftsmanId === userId;
-  if (!isClient && !isCraftsman) throw AppError.forbidden();
-  return { isClient, isCraftsman };
 };
 
 export const getJob = async (jobId: string, userId: string, role: Role) => {
@@ -102,8 +80,9 @@ export const getJob = async (jobId: string, userId: string, role: Role) => {
   throw AppError.forbidden();
 };
 
-// Atomic: only one craftsman can win an OPEN job. We rely on the unique
-// `jobId` constraint on JobAssignment + a status check.
+// Atomic: only one craftsman can win an OPEN job. Relies on the unique
+// constraint on JobAssignment.jobId — concurrent acceptors hit Prisma P2002
+// which the global error handler maps to 409 Conflict.
 export const acceptJob = async (jobId: string, craftsmanId: string) =>
   prisma.$transaction(async (tx) => {
     const job = await tx.job.findUnique({ where: { id: jobId } });
@@ -132,7 +111,9 @@ const transitionStatus = async (
     const job = await tx.job.findUnique({ where: { id: jobId }, include: { assignment: true } });
     if (!job) throw AppError.notFound('Job not found');
     if (job.assignment?.craftsmanId !== craftsmanId) throw AppError.forbidden();
-    if (job.status !== from) throw AppError.conflict(`Cannot transition from ${job.status} to ${to}`);
+    if (job.status !== from) {
+      throw AppError.conflict(`Cannot transition from ${job.status} to ${to}`);
+    }
 
     const updated = await tx.job.update({
       where: { id: jobId },
@@ -141,16 +122,10 @@ const transitionStatus = async (
     });
 
     if (to === JobStatus.IN_PROGRESS) {
-      await tx.jobAssignment.update({
-        where: { jobId },
-        data: { startedAt: new Date() },
-      });
+      await tx.jobAssignment.update({ where: { jobId }, data: { startedAt: new Date() } });
     }
     if (to === JobStatus.COMPLETED) {
-      await tx.jobAssignment.update({
-        where: { jobId },
-        data: { completedAt: new Date() },
-      });
+      await tx.jobAssignment.update({ where: { jobId }, data: { completedAt: new Date() } });
     }
 
     await notify(tx, job.clientId, notif, { jobId });
@@ -182,64 +157,4 @@ export const cancelJob = async (jobId: string, clientId: string) =>
       await notify(tx, job.assignment.craftsmanId, NotificationType.JOB_CANCELLED, { jobId });
     }
     return updated;
-  });
-
-export const listMessages = async (jobId: string, userId: string) => {
-  const job = await prisma.job.findUnique({ where: { id: jobId }, include: { assignment: true } });
-  if (!job) throw AppError.notFound('Job not found');
-  if (job.clientId !== userId && job.assignment?.craftsmanId !== userId) {
-    throw AppError.forbidden();
-  }
-  return prisma.message.findMany({
-    where: { jobId },
-    orderBy: { createdAt: 'asc' },
-    include: { sender: { select: { id: true, name: true, avatarUrl: true } } },
-  });
-};
-
-export const sendMessage = async (jobId: string, senderId: string, content: string) => {
-  const job = await prisma.job.findUnique({ where: { id: jobId }, include: { assignment: true } });
-  if (!job) throw AppError.notFound('Job not found');
-  if (!job.assignment) throw AppError.conflict('Chat is only available once the job is assigned');
-  const isClient = job.clientId === senderId;
-  const isCraftsman = job.assignment.craftsmanId === senderId;
-  if (!isClient && !isCraftsman) throw AppError.forbidden();
-
-  const recipientId = isClient ? job.assignment.craftsmanId : job.clientId;
-
-  return prisma.$transaction(async (tx) => {
-    const msg = await tx.message.create({
-      data: { jobId, senderId, content },
-      include: { sender: { select: { id: true, name: true, avatarUrl: true } } },
-    });
-    await notify(tx, recipientId, NotificationType.NEW_MESSAGE, { jobId, messageId: msg.id });
-    return msg;
-  });
-};
-
-export const createReview = async (
-  jobId: string,
-  fromId: string,
-  rating: number,
-  comment?: string,
-) =>
-  prisma.$transaction(async (tx) => {
-    const job = await tx.job.findUnique({ where: { id: jobId }, include: { assignment: true } });
-    if (!job) throw AppError.notFound('Job not found');
-    if (job.status !== JobStatus.COMPLETED) {
-      throw AppError.conflict('Reviews are only allowed on completed jobs');
-    }
-    if (!job.assignment) throw AppError.conflict('Job has no assignment');
-
-    const isClient = job.clientId === fromId;
-    const isCraftsman = job.assignment.craftsmanId === fromId;
-    if (!isClient && !isCraftsman) throw AppError.forbidden();
-
-    const toId = isClient ? job.assignment.craftsmanId : job.clientId;
-
-    const review = await tx.review.create({
-      data: { jobId, fromId, toId, rating, comment },
-    });
-    await notify(tx, toId, NotificationType.NEW_REVIEW, { jobId, reviewId: review.id });
-    return review;
   });

@@ -23,5 +23,7 @@
     },
   };
 
+  const KR = (window.KR = window.KR || {});
+  KR.Router = Router;
   window.Router = Router;
 })();

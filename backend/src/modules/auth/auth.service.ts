@@ -8,6 +8,7 @@ import {
   hashRefreshToken,
   signAccessToken,
 } from '../../utils/jwt';
+import { PUBLIC_USER_SELECT } from '../users/users.selectors';
 import type { LoginInput, RegisterInput } from './auth.schemas';
 
 const sanitize = (u: User) => ({
@@ -101,12 +102,17 @@ export const logout = async (refreshToken: string) => {
   });
 };
 
+// Use a typed `select` so `passwordHash` cannot be returned by accident.
 export const getMe = async (userId: string) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { craftsmanProfile: { include: { categories: { include: { category: true } } } } },
+    select: {
+      ...PUBLIC_USER_SELECT,
+      craftsmanProfile: {
+        include: { categories: { include: { category: true } } },
+      },
+    },
   });
   if (!user) throw AppError.notFound('User not found');
-  const { passwordHash: _ph, ...rest } = user;
-  return rest;
+  return user;
 };

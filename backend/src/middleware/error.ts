@@ -1,39 +1,44 @@
-import type { ErrorRequestHandler } from 'express';
+import type { ErrorRequestHandler, Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
 import { AppError } from '../utils/AppError';
 import { logger } from '../config/logger';
 
-export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+interface ErrorBody {
+  error: string;
+  message: string;
+  details?: unknown;
+  requestId?: string;
+}
+
+const send = (res: Response, status: number, body: ErrorBody, requestId?: string) => {
+  res.status(status).json({ ...body, requestId });
+};
+
+export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
+  const reqId = req.id;
+
   if (err instanceof AppError) {
-    res.status(err.statusCode).json({ error: err.code, message: err.message, details: err.details });
-    return;
+    return send(res, err.statusCode, { error: err.code, message: err.message, details: err.details }, reqId);
   }
 
   if (err instanceof ZodError) {
-    res.status(400).json({
-      error: 'validation_error',
-      message: 'Invalid request',
-      details: err.flatten(),
-    });
-    return;
+    return send(res, 400, { error: 'validation_error', message: 'Invalid request', details: err.flatten() }, reqId);
   }
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === 'P2002') {
-      res.status(409).json({ error: 'conflict', message: 'Resource already exists' });
-      return;
+      return send(res, 409, { error: 'conflict', message: 'Resource already exists' }, reqId);
     }
     if (err.code === 'P2025') {
-      res.status(404).json({ error: 'not_found', message: 'Resource not found' });
-      return;
+      return send(res, 404, { error: 'not_found', message: 'Resource not found' }, reqId);
     }
   }
 
-  logger.error({ err }, 'Unhandled error');
-  res.status(500).json({ error: 'internal_error', message: 'Something went wrong' });
+  logger.error({ err, reqId }, 'Unhandled error');
+  send(res, 500, { error: 'internal_error', message: 'Something went wrong' }, reqId);
 };
 
-export const notFoundHandler = (_req: import('express').Request, res: import('express').Response) => {
-  res.status(404).json({ error: 'not_found', message: 'Route not found' });
+export const notFoundHandler = (req: Request, res: Response) => {
+  res.status(404).json({ error: 'not_found', message: 'Route not found', requestId: req.id });
 };
