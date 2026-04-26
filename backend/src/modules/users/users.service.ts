@@ -1,5 +1,7 @@
 import { prisma } from '../../config/prisma';
+import { env } from '../../config/env';
 import { AppError } from '../../utils/AppError';
+import { getOrSet } from '../../cache/redisCache';
 import { PUBLIC_USER_SELECT } from './users.selectors';
 import type { UpdateCraftsmanInput, UpdateMeInput } from './users.schemas';
 
@@ -39,7 +41,7 @@ export const updateCraftsmanProfile = async (userId: string, input: UpdateCrafts
   });
 };
 
-export const getPublicProfile = async (userId: string) => {
+const loadPublicProfile = async (userId: string) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -84,3 +86,6 @@ export const getPublicProfile = async (userId: string) => {
     ratingCount: ratingAgg._count,
   };
 };
+
+export const getPublicProfile = async (userId: string) =>
+  getOrSet(`user:pub:${userId}`, env.CACHE_TTL_USER, () => loadPublicProfile(userId));

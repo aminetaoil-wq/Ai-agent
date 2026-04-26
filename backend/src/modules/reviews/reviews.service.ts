@@ -1,13 +1,19 @@
-import { JobStatus, NotificationType } from '@prisma/client';
+import { JobStatus, NotificationType, type Review } from '@prisma/client';
 import { prisma } from '../../config/prisma';
 import { AppError } from '../../utils/AppError';
+
+export interface CreateReviewResult {
+  review: Review;
+  toId: string;
+  notificationId: string;
+}
 
 export const createReview = async (
   jobId: string,
   fromId: string,
   rating: number,
   comment?: string,
-) =>
+): Promise<CreateReviewResult> =>
   prisma.$transaction(async (tx) => {
     const job = await tx.job.findUnique({
       where: { id: jobId },
@@ -28,12 +34,12 @@ export const createReview = async (
     const review = await tx.review.create({
       data: { jobId, fromId, toId, rating, comment },
     });
-    await tx.notification.create({
+    const notification = await tx.notification.create({
       data: {
         userId: toId,
         type: NotificationType.NEW_REVIEW,
         payload: { jobId, reviewId: review.id },
       },
     });
-    return review;
+    return { review, toId, notificationId: notification.id };
   });

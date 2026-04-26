@@ -1,11 +1,13 @@
 import express, { type Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import morgan from 'morgan';
 import { env } from './config/env';
 import { errorHandler, notFoundHandler } from './middleware/error';
 import { requestId } from './middleware/requestId';
-import { rateLimit } from './middleware/rateLimit';
+import { requestLogger } from './middleware/requestLogger';
+import { redisRateLimit } from './middleware/redisRateLimit';
+import { httpMetricsMiddleware, metricsHandler } from './observability/metrics';
+import { liveness, readiness } from './observability/health';
 import { authRouter } from './modules/auth/auth.routes';
 import { usersRouter } from './modules/users/users.routes';
 import { categoriesRouter } from './modules/categories/categories.routes';
@@ -15,18 +17,41 @@ export const createApp = (): Application => {
   const app = express();
 
   app.disable('x-powered-by');
+  app.set('trust proxy', 1); // Honour X-Forwarded-For from the reverse proxy.
   app.use(requestId);
   app.use(helmet());
-  app.use(cors({ origin: env.CORS_ORIGIN.split(',').map((s) => s.trim()), credentials: false }));
+  app.use(
+    cors({
+      origin: env.CORS_ORIGIN.split(',').map((s) => s.trim()),
+      credentials: false,
+      allowedHeaders: ['Content-Type', 'Authorization', 'If-None-Match', 'Idempotency-Key', 'X-Request-ID'],
+      exposedHeaders: ['ETag', 'X-Request-ID', 'Retry-After', 'X-RateLimit-Limit', 'X-RateLimit-Remaining'],
+    }),
+  );
   app.use(express.json({ limit: '1mb' }));
-  if (env.NODE_ENV !== 'test') app.use(morgan('tiny'));
+  app.use(httpMetricsMiddleware);
+  app.use(requestLogger);
 
-  app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+  // Ops endpoints — kept off /api so they aren't subject to the API-wide
+  // rate limiter and aren't logged by requestLogger.
+  app.get('/health', liveness);
+  app.get('/ready', readiness);
+  app.get('/metrics', metricsHandler);
 
-  // Auth surface is the cheapest target for credential stuffing — limit it.
-  // 20 attempts per 15 minutes per IP is a generous human cap, hostile to bots.
-  const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
-  app.use('/api/auth', authLimiter, authRouter);
+  // Soft API-wide ceiling. Catches runaway clients without hampering normal use.
+  app.use('/api', redisRateLimit({ windowMs: 60_000, max: 600, keyPrefix: 'api' }));
+
+  // Auth surface is the cheapest target for credential stuffing — tighter cap.
+  app.use(
+    '/api/auth',
+    redisRateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 20,
+      keyPrefix: 'auth',
+      keyFn: (req) => req.ip ?? 'anon',
+    }),
+    authRouter,
+  );
 
   app.use('/api/users', usersRouter);
   app.use('/api/categories', categoriesRouter);

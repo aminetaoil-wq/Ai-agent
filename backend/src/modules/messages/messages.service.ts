@@ -1,4 +1,4 @@
-import { NotificationType, Prisma } from '@prisma/client';
+import { NotificationType, Prisma, type Message, type User } from '@prisma/client';
 import { prisma } from '../../config/prisma';
 import { AppError } from '../../utils/AppError';
 
@@ -16,6 +16,15 @@ const requireParticipant = async (jobId: string, userId: string) => {
   return { job, isClient };
 };
 
+export type MessageWithSender = Message & {
+  sender: Pick<User, 'id' | 'name' | 'avatarUrl'>;
+};
+
+export interface SendMessageResult {
+  message: MessageWithSender;
+  notificationId: string;
+}
+
 export const listMessages = async (jobId: string, userId: string) => {
   await requireParticipant(jobId, userId);
   return prisma.message.findMany({
@@ -25,7 +34,11 @@ export const listMessages = async (jobId: string, userId: string) => {
   });
 };
 
-export const sendMessage = async (jobId: string, senderId: string, content: string) => {
+export const sendMessage = async (
+  jobId: string,
+  senderId: string,
+  content: string,
+): Promise<SendMessageResult> => {
   const { job, isClient } = await requireParticipant(jobId, senderId);
   if (!job.assignment) {
     throw AppError.conflict('Chat is only available once the job is assigned');
@@ -37,13 +50,13 @@ export const sendMessage = async (jobId: string, senderId: string, content: stri
       data: { jobId, senderId, content },
       include: { sender: { select: SENDER_SELECT } },
     });
-    await tx.notification.create({
+    const n = await tx.notification.create({
       data: {
         userId: recipientId,
         type: NotificationType.NEW_MESSAGE,
         payload: { jobId, messageId: msg.id },
       },
     });
-    return msg;
+    return { message: msg, notificationId: n.id };
   });
 };

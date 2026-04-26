@@ -6,6 +6,7 @@ import { asyncHandler } from '../../utils/asyncHandler';
 import { validate } from '../../middleware/validate';
 import { requireAuth, requireRole } from '../../middleware/auth';
 import { param } from '../../utils/params';
+import { invalidateUser } from '../../cache/invalidate';
 import { updateCraftsmanSchema, updateMeSchema } from './users.schemas';
 
 export const usersRouter = Router();
@@ -16,6 +17,7 @@ usersRouter.patch(
   validate(updateMeSchema),
   asyncHandler(async (req, res) => {
     const user = await service.updateMe(req.user!.id, req.body);
+    await invalidateUser(req.user!.id);
     res.json({ user });
   }),
 );
@@ -27,6 +29,7 @@ usersRouter.patch(
   validate(updateCraftsmanSchema),
   asyncHandler(async (req, res) => {
     const profile = await service.updateCraftsmanProfile(req.user!.id, req.body);
+    await invalidateUser(req.user!.id);
     res.json({ profile });
   }),
 );

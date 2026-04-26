@@ -4,6 +4,7 @@ import * as service from './jobs.service';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { validate } from '../../middleware/validate';
 import { requireAuth, requireRole } from '../../middleware/auth';
+import { idempotency } from '../../middleware/idempotency';
 import { param } from '../../utils/params';
 import {
   createJobSchema,
@@ -13,18 +14,24 @@ import {
 } from './jobs.schemas';
 import { messagesRouter } from '../messages/messages.routes';
 import { reviewsRouter } from '../reviews/reviews.routes';
+import { invalidateJob, invalidateOpenFeed } from '../../cache/invalidate';
+import { enqueueNotificationFanout } from '../../queue/enqueue';
 
 export const jobsRouter = Router();
 
-// All endpoints below require auth.
 jobsRouter.use(requireAuth);
+
+const fanout = (notificationIds: string[], reqId?: string) =>
+  Promise.all(notificationIds.map((id) => enqueueNotificationFanout({ notificationId: id, reqId })));
 
 jobsRouter.post(
   '/',
   requireRole(Role.CLIENT),
+  idempotency(),
   validate(createJobSchema),
   asyncHandler(async (req, res) => {
     const job = await service.createJob(req.user!.id, req.body);
+    await invalidateOpenFeed();
     res.status(201).json({ job });
   }),
 );
@@ -64,7 +71,9 @@ jobsRouter.patch(
   validate(idParamSchema, 'params'),
   validate(updateJobSchema),
   asyncHandler(async (req, res) => {
-    const job = await service.updateJob(req.user!.id, param(req, 'id'), req.body);
+    const id = param(req, 'id');
+    const job = await service.updateJob(req.user!.id, id, req.body);
+    await Promise.all([invalidateJob(id), invalidateOpenFeed()]);
     res.json({ job });
   }),
 );
@@ -72,9 +81,13 @@ jobsRouter.patch(
 jobsRouter.post(
   '/:id/accept',
   requireRole(Role.CRAFTSMAN),
+  idempotency(),
   validate(idParamSchema, 'params'),
   asyncHandler(async (req, res) => {
-    const job = await service.acceptJob(param(req, 'id'), req.user!.id);
+    const id = param(req, 'id');
+    const { job, notifications } = await service.acceptJob(id, req.user!.id);
+    await Promise.all([invalidateJob(id), invalidateOpenFeed()]);
+    await fanout(notifications, req.id);
     res.json({ job });
   }),
 );
@@ -84,7 +97,10 @@ jobsRouter.post(
   requireRole(Role.CRAFTSMAN),
   validate(idParamSchema, 'params'),
   asyncHandler(async (req, res) => {
-    const job = await service.startJob(param(req, 'id'), req.user!.id);
+    const id = param(req, 'id');
+    const { job, notifications } = await service.startJob(id, req.user!.id);
+    await invalidateJob(id);
+    await fanout(notifications, req.id);
     res.json({ job });
   }),
 );
@@ -94,7 +110,10 @@ jobsRouter.post(
   requireRole(Role.CRAFTSMAN),
   validate(idParamSchema, 'params'),
   asyncHandler(async (req, res) => {
-    const job = await service.completeJob(param(req, 'id'), req.user!.id);
+    const id = param(req, 'id');
+    const { job, notifications } = await service.completeJob(id, req.user!.id);
+    await invalidateJob(id);
+    await fanout(notifications, req.id);
     res.json({ job });
   }),
 );
@@ -104,11 +123,13 @@ jobsRouter.post(
   requireRole(Role.CLIENT),
   validate(idParamSchema, 'params'),
   asyncHandler(async (req, res) => {
-    const job = await service.cancelJob(param(req, 'id'), req.user!.id);
+    const id = param(req, 'id');
+    const { job, notifications } = await service.cancelJob(id, req.user!.id);
+    await Promise.all([invalidateJob(id), invalidateOpenFeed()]);
+    await fanout(notifications, req.id);
     res.json({ job });
   }),
 );
 
-// Sub-resources mounted as nested routers (URLs unchanged).
 jobsRouter.use('/:id/messages', validate(idParamSchema, 'params'), messagesRouter);
 jobsRouter.use('/:id/reviews', validate(idParamSchema, 'params'), reviewsRouter);
