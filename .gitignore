@@ -13,6 +13,7 @@ backend/dist/
 .env
 .env.*
 !.env.example
+!.env.production.example
 
 # Prisma
 backend/prisma/migrations/dev.db*

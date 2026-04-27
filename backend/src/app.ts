@@ -1,4 +1,5 @@
 import express, { type Application } from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './config/env';
@@ -20,6 +21,8 @@ export const createApp = (): Application => {
   app.set('trust proxy', 1); // Honour X-Forwarded-For from the reverse proxy.
   app.use(requestId);
   app.use(helmet());
+  // gzip JSON responses; threshold avoids compressing tiny health bodies.
+  app.use(compression({ threshold: 1024 }));
   app.use(
     cors({
       origin: env.CORS_ORIGIN.split(',').map((s) => s.trim()),

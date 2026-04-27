@@ -242,7 +242,13 @@ Demo accounts created by the seed:
 
 ---
 
-## 7. Roadmap (post-MVP)
+## 7. Deploying to production
+
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the step-by-step
+walkthrough across Netlify (frontend) + Fly.io (API + worker) +
+Neon (Postgres) + Upstash (Redis).
+
+## 8. Roadmap (post-MVP)
 
 - Replace polling with Socket.io for chat + live job feed.
 - Stripe Connect for escrowed payments to craftsmen.
