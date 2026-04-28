@@ -15,12 +15,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // For production with pgbouncer (e.g. Neon), uncomment the line below
-  // and set DATABASE_DIRECT_URL. Migrations cannot run through pgbouncer
-  // in transaction-pooling mode because Prisma uses prepared statements.
-  //   directUrl = env("DATABASE_DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Migrations cannot run through pgbouncer (Neon's pooled URL) because
+  // Prisma uses prepared statements. `prisma migrate deploy` connects
+  // via DATABASE_DIRECT_URL; runtime queries keep using the pooled
+  // DATABASE_URL. Locally, point both at the same Postgres.
+  directUrl = env("DATABASE_DIRECT_URL")
 }
 
 enum Role {
@@ -59,11 +60,11 @@ model User {
   updatedAt    DateTime @updatedAt
 
   craftsmanProfile CraftsmanProfile?
-  jobsPosted       Job[]              @relation("ClientJobs")
+  jobsPosted       Job[]             @relation("ClientJobs")
   assignments      JobAssignment[]
-  messagesSent     Message[]          @relation("MessageSender")
-  reviewsGiven     Review[]           @relation("ReviewFrom")
-  reviewsReceived  Review[]           @relation("ReviewTo")
+  messagesSent     Message[]         @relation("MessageSender")
+  reviewsGiven     Review[]          @relation("ReviewFrom")
+  reviewsReceived  Review[]          @relation("ReviewTo")
   notifications    Notification[]
   refreshTokens    RefreshToken[]
 
@@ -71,30 +72,30 @@ model User {
 }
 
 model CraftsmanProfile {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  kvkNumber   String?
-  bio         String?
-  hourlyRate  Int?     // in euro cents
-  city        String?
-  verified    Boolean  @default(false)
-  categories  CategoryOnCraftsman[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String                @id @default(cuid())
+  userId     String                @unique
+  user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kvkNumber  String?
+  bio        String?
+  hourlyRate Int? // in euro cents
+  city       String?
+  verified   Boolean               @default(false)
+  categories CategoryOnCraftsman[]
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
 
   @@index([city])
   @@index([verified])
 }
 
 model Category {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  slug      String   @unique
+  id        String                @id @default(cuid())
+  name      String                @unique
+  slug      String                @unique
   icon      String?
   jobs      Job[]
   craftsmen CategoryOnCraftsman[]
-  createdAt DateTime @default(now())
+  createdAt DateTime              @default(now())
 }
 
 // Many-to-many between craftsmen and the categories they serve.
@@ -109,20 +110,20 @@ model CategoryOnCraftsman {
 }
 
 model Job {
-  id           String     @id @default(cuid())
-  clientId     String
-  client       User       @relation("ClientJobs", fields: [clientId], references: [id])
-  categoryId   String
-  category     Category   @relation(fields: [categoryId], references: [id])
-  title        String
-  description  String
-  city         String
-  postcode     String?
-  budgetCents  Int?
-  scheduledAt  DateTime?
-  status       JobStatus  @default(OPEN)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id          String    @id @default(cuid())
+  clientId    String
+  client      User      @relation("ClientJobs", fields: [clientId], references: [id])
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  title       String
+  description String
+  city        String
+  postcode    String?
+  budgetCents Int?
+  scheduledAt DateTime?
+  status      JobStatus @default(OPEN)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   assignment JobAssignment?
   messages   Message[]
@@ -135,12 +136,12 @@ model Job {
 }
 
 model JobAssignment {
-  id          String   @id @default(cuid())
-  jobId       String   @unique
-  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  id          String    @id @default(cuid())
+  jobId       String    @unique
+  job         Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
   craftsmanId String
-  craftsman   User     @relation(fields: [craftsmanId], references: [id])
-  acceptedAt  DateTime @default(now())
+  craftsman   User      @relation(fields: [craftsmanId], references: [id])
+  acceptedAt  DateTime  @default(now())
   startedAt   DateTime?
   completedAt DateTime?
 
@@ -148,14 +149,14 @@ model JobAssignment {
 }
 
 model Message {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   jobId     String
-  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  job       Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
   senderId  String
-  sender    User     @relation("MessageSender", fields: [senderId], references: [id])
+  sender    User      @relation("MessageSender", fields: [senderId], references: [id])
   content   String
   readAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([jobId, createdAt])
 }
@@ -189,13 +190,13 @@ model Notification {
 }
 
 model RefreshToken {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash  String   @unique
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  createdAt  DateTime @default(now())
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([userId])
 }

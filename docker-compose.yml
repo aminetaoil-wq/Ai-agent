@@ -45,6 +45,8 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://klusraak:klusraak@db:5432/klusraak?schema=public
+      # No pooler in front of local Postgres, so direct URL == pooled URL.
+      DATABASE_DIRECT_URL: postgresql://klusraak:klusraak@db:5432/klusraak?schema=public
     restart: 'no'
 
   api:
@@ -65,6 +67,7 @@ services:
       LOG_LEVEL: info
       CORS_ORIGIN: http://localhost:5173,http://localhost:8080
       DATABASE_URL: postgresql://klusraak:klusraak@db:5432/klusraak?schema=public
+      DATABASE_DIRECT_URL: postgresql://klusraak:klusraak@db:5432/klusraak?schema=public
       REDIS_URL: redis://redis:6379
       JWT_ACCESS_SECRET: dev-access-secret-change-in-production
       JWT_REFRESH_SECRET: dev-refresh-secret-change-in-production
@@ -96,6 +99,7 @@ services:
       NODE_ENV: production
       LOG_LEVEL: info
       DATABASE_URL: postgresql://klusraak:klusraak@db:5432/klusraak?schema=public
+      DATABASE_DIRECT_URL: postgresql://klusraak:klusraak@db:5432/klusraak?schema=public
       REDIS_URL: redis://redis:6379
       JWT_ACCESS_SECRET: dev-access-secret-change-in-production
       JWT_REFRESH_SECRET: dev-refresh-secret-change-in-production
