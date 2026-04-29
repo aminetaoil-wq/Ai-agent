@@ -459,3 +459,22 @@ textarea { resize: vertical; min-height: 96px; }
   padding: 40px 20px;
   color: var(--sub);
 }
+
+/* Static-demo mode badge — rendered only when js/demo/mock-api.js
+   activates and adds .demo-mode to <body>. */
+body.demo-mode::after {
+  content: 'DEMO';
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 9999;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #ff7a1a;
+  color: #1a0d04;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
