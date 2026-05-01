@@ -1,0 +1,36 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Build artifacts
+backend/dist/
+*.tsbuildinfo
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Prisma
+backend/prisma/migrations/dev.db*
+backend/prisma/.env
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+
+# Docker
+*.pid

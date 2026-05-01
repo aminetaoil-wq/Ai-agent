@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KlusRaak — Vakmannen op jouw moment</title>
+  <!-- Inline-SVG fallback favicon. js/favicon.js animates it via canvas
+       once the page boots; this static version covers no-JS / first paint. -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='1' y='1' width='30' height='30' rx='7' fill='%230d0d0d'/><text x='16' y='17' text-anchor='middle' dominant-baseline='central' font-family='system-ui,sans-serif' font-weight='700' font-size='18' fill='white'>K</text><circle cx='16' cy='3.5' r='1.6' fill='%23ff7a1a'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- HOME (public landing) -->
+  <section id="sc-home" class="sc on">
+    <nav>
+      <div class="logo" data-go="sc-home">Klus<span>Raak</span></div>
+      <div class="nav-right">
+        <button class="btn btn-primary btn-sm" data-action="open-login">Inloggen</button>
+      </div>
+    </nav>
+
+    <div class="hbg">
+      <div class="ctr fu">
+        <div class="badge bo">⚡ Gemiddeld binnen 30 min iemand</div>
+        <h1 class="h1">Jouw klus.<br>De juiste <span class="accent">vakman.</span></h1>
+        <p class="sm mt12">
+          Dien je klus in en de eerste beschikbare vakman in jouw buurt neemt
+          hem aan. Snel, simpel, betrouwbaar.
+        </p>
+        <div class="flex g10 mt20">
+          <button class="btn btn-primary" data-action="open-register-client">Klus plaatsen</button>
+          <button class="btn btn-outline" data-action="open-register-craftsman">Word vakman</button>
+        </div>
+
+        <div class="stat-grid mt24">
+          <div class="stat-box"><div class="stat-num">12k+</div><div class="stat-lbl">Klussen</div></div>
+          <div class="stat-box"><div class="stat-num">2.4k</div><div class="stat-lbl">Vakmannen</div></div>
+          <div class="stat-box"><div class="stat-num">4.8★</div><div class="stat-lbl">Gemiddeld</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctr">
+      <div class="sec-label">Hoe het werkt</div>
+      <div class="flex fc g12">
+        <div class="card">
+          <h3 class="h3">1. Plaats je klus</h3>
+          <p class="sm mt4">Beschrijf wat er moet gebeuren, in welke stad, wanneer.</p>
+        </div>
+        <div class="card">
+          <h3 class="h3">2. Vakman accepteert</h3>
+          <p class="sm mt4">De eerste beschikbare vakman in de buurt pakt 'm op.</p>
+        </div>
+        <div class="card">
+          <h3 class="h3">3. Klaar &amp; betalen</h3>
+          <p class="sm mt4">Klus afgerond? Beoordeel de vakman en betaal veilig.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTH -->
+  <section id="sc-auth" class="sc">
+    <nav>
+      <button class="btn btn-ghost" data-go="sc-home">← Terug</button>
+      <div class="logo">Klus<span>Raak</span></div>
+      <span style="width:60px"></span>
+    </nav>
+
+    <div class="ctr">
+      <div class="rtabs">
+        <button class="rtab on" data-tab="login">Inloggen</button>
+        <button class="rtab" data-tab="register">Registreren</button>
+      </div>
+
+      <!-- Login -->
+      <form id="form-login" class="flex fc g12">
+        <div class="fg">
+          <label>E-mail<span class="req">*</span></label>
+          <input type="email" name="email" required placeholder="jij@voorbeeld.nl" autocomplete="email" />
+        </div>
+        <div class="fg">
+          <label>Wachtwoord<span class="req">*</span></label>
+          <div class="pw-w">
+            <input type="password" name="password" required minlength="8" autocomplete="current-password" />
+            <button type="button" class="pw-t" data-toggle-pw>👁</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full mt8">Inloggen</button>
+        <p class="sm tc">Demo: <code>klant@klusraak.nl</code> / <code>Demo1234!</code></p>
+      </form>
+
+      <!-- Register -->
+      <form id="form-register" class="flex fc g12" hidden>
+        <div class="og">
+          <div class="oc" data-role="CLIENT">
+            <div class="oi">🛠</div>
+            <div class="ol">Ik heb een klus</div>
+            <div class="os">Klant</div>
+          </div>
+          <div class="oc" data-role="CRAFTSMAN">
+            <div class="oi">👷</div>
+            <div class="ol">Ik ben vakman</div>
+            <div class="os">Aanbieder</div>
+          </div>
+        </div>
+        <input type="hidden" name="role" value="CLIENT" />
+
+        <div class="fg">
+          <label>Naam<span class="req">*</span></label>
+          <input type="text" name="name" required minlength="2" placeholder="Jouw naam" autocomplete="name" />
+        </div>
+        <div class="fg">
+          <label>E-mail<span class="req">*</span></label>
+          <input type="email" name="email" required placeholder="jij@voorbeeld.nl" autocomplete="email" />
+        </div>
+        <div class="fg">
+          <label>Telefoon</label>
+          <input type="tel" name="phone" placeholder="+31 6 ..." autocomplete="tel" />
+        </div>
+        <div class="fg">
+          <label>Wachtwoord<span class="req">*</span></label>
+          <div class="pw-w">
+            <input type="password" name="password" required minlength="8" autocomplete="new-password" />
+            <button type="button" class="pw-t" data-toggle-pw>👁</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full mt8">Account aanmaken</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- DASHBOARD (authenticated home) -->
+  <section id="sc-dash" class="sc">
+    <nav>
+      <div class="logo" data-go="sc-dash">Klus<span>Raak</span></div>
+      <div class="nav-right">
+        <button class="btn btn-ghost" data-action="logout">Uitloggen</button>
+      </div>
+    </nav>
+    <div class="ctr" id="dash-body"></div>
+    <div class="bnav">
+      <button class="bni on" data-go="sc-dash"><span class="ico">🏠</span>Home</button>
+      <button class="bni" data-go="sc-jobs"><span class="ico">📋</span>Klussen</button>
+      <button class="bni" data-go="sc-profile"><span class="ico">👤</span>Profiel</button>
+    </div>
+  </section>
+
+  <!-- JOBS LIST (role-aware) -->
+  <section id="sc-jobs" class="sc">
+    <nav>
+      <button class="btn btn-ghost" data-go="sc-dash">← Home</button>
+      <div class="logo">Klus<span>Raak</span></div>
+      <span style="width:60px"></span>
+    </nav>
+    <div class="ctr">
+      <h2 class="h2" id="jobs-title">Mijn klussen</h2>
+      <div class="chips mt12" id="jobs-chips"></div>
+      <div class="flex fc g12 mt16" id="jobs-list"></div>
+    </div>
+    <div class="bnav">
+      <button class="bni" data-go="sc-dash"><span class="ico">🏠</span>Home</button>
+      <button class="bni on" data-go="sc-jobs"><span class="ico">📋</span>Klussen</button>
+      <button class="bni" data-go="sc-profile"><span class="ico">👤</span>Profiel</button>
+    </div>
+  </section>
+
+  <!-- NEW JOB (CLIENT) -->
+  <section id="sc-new" class="sc">
+    <nav>
+      <button class="btn btn-ghost" data-go="sc-dash">← Terug</button>
+      <div class="logo">Klus<span>Raak</span></div>
+      <span style="width:60px"></span>
+    </nav>
+    <div class="ctr">
+      <h2 class="h2">Nieuwe klus</h2>
+      <form id="form-new-job" class="flex fc g12 mt16">
+        <div class="fg">
+          <label>Categorie<span class="req">*</span></label>
+          <select name="categoryId" required></select>
+        </div>
+        <div class="fg">
+          <label>Titel<span class="req">*</span></label>
+          <input type="text" name="title" required minlength="4" maxlength="120" placeholder="Bijv. Stopcontact vervangen" />
+        </div>
+        <div class="fg">
+          <label>Beschrijving<span class="req">*</span></label>
+          <textarea name="description" required minlength="10" maxlength="5000" rows="4" placeholder="Wat moet er gebeuren?"></textarea>
+        </div>
+        <div class="fg">
+          <label>Stad<span class="req">*</span></label>
+          <input type="text" name="city" required placeholder="Amsterdam" />
+        </div>
+        <div class="fg">
+          <label>Postcode</label>
+          <input type="text" name="postcode" placeholder="1011AB" />
+        </div>
+        <div class="fg">
+          <label>Budget (€, optioneel)</label>
+          <input type="number" name="budgetEuro" min="0" step="1" placeholder="bijv. 75" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full mt8">Klus plaatsen</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- JOB DETAIL -->
+  <section id="sc-job" class="sc">
+    <nav>
+      <button class="btn btn-ghost" data-go="sc-jobs">← Klussen</button>
+      <div class="logo">Klus<span>Raak</span></div>
+      <span style="width:60px"></span>
+    </nav>
+    <div class="ctr" id="job-body"></div>
+  </section>
+
+  <!-- CHAT -->
+  <section id="sc-chat" class="sc">
+    <nav>
+      <button class="btn btn-ghost" data-action="back-to-job">← Klus</button>
+      <div class="logo">Chat</div>
+      <span style="width:60px"></span>
+    </nav>
+    <div class="ctr flex fc g8" id="chat-thread" style="flex:1;overflow-y:auto;padding-bottom:80px;"></div>
+    <form id="chat-form" class="chat-input-row">
+      <input type="text" name="content" placeholder="Bericht..." autocomplete="off" required />
+      <button class="btn btn-primary btn-sm" type="submit">Stuur</button>
+    </form>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="sc-profile" class="sc">
+    <nav>
+      <button class="btn btn-ghost" data-go="sc-dash">← Home</button>
+      <div class="logo">Profiel</div>
+      <span style="width:60px"></span>
+    </nav>
+    <div class="ctr" id="profile-body"></div>
+    <div class="bnav">
+      <button class="bni" data-go="sc-dash"><span class="ico">🏠</span>Home</button>
+      <button class="bni" data-go="sc-jobs"><span class="ico">📋</span>Klussen</button>
+      <button class="bni on" data-go="sc-profile"><span class="ico">👤</span>Profiel</button>
+    </div>
+  </section>
+
+  <div id="toast"></div>
+
+  <script src="js/favicon.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/demo/mock-store.js"></script>
+  <script src="js/demo/mock-data.js"></script>
+  <script src="js/demo/mock-api.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/screens.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
