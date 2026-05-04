@@ -1,0 +1,47 @@
+name: Deploy demo to GitHub Pages
+
+# Pushes a build of frontend/public to the gh-pages branch and asks the
+# Pages action to enable Pages on the repo if it isn't yet. Avoids the
+# Settings → Pages click step on a fresh repo.
+
+on:
+  push:
+    branches:
+      - claude/enhance-ai-agent-repo-08eo2
+    paths:
+      - 'klusraak/frontend/public/**'
+      - '.github/workflows/deploy-demo-pages.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages (enable if needed)
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload demo artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: klusraak/frontend/public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

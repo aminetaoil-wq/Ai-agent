@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B0B0E" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#FAFAF9" media="(prefers-color-scheme: light)" />
+  <meta name="description" content="KlusRaak — vind binnen 30 minuten een vakman in jouw buurt voor klussen, onderhoud en reparaties. Snel, simpel en betrouwbaar." />
+  <title>KlusRaak — Vakmannen op jouw moment</title>
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='1' y='1' width='30' height='30' rx='7' fill='%230B0B0E'/><text x='16' y='17' text-anchor='middle' dominant-baseline='central' font-family='system-ui,sans-serif' font-weight='800' font-size='18' fill='white'>K</text><circle cx='16' cy='3.5' r='1.6' fill='%23F97316'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Direct naar inhoud</a>
+
+  <!-- Live region for screen-reader route announcements -->
+  <div id="route-live" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Snackbar (was: #toast — kept as alias) -->
+  <div id="snackbar" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ============================================================
+       HOME (public landing)
+       ============================================================ -->
+  <section id="sc-home" class="sc on" aria-labelledby="home-title">
+    <header class="app-header">
+      <div class="app-header__inner">
+        <button type="button" class="logo" data-go="sc-home" aria-label="KlusRaak — naar home">Klus<span>Raak</span></button>
+        <nav class="nav-links" aria-label="Hoofdnavigatie">
+          <button type="button" class="nav-link" data-go="sc-services">Diensten</button>
+          <button type="button" class="nav-link" data-scroll-to="#how-it-works">Hoe het werkt</button>
+          <button type="button" class="nav-link" data-action="open-register-craftsman">Word vakman</button>
+        </nav>
+        <div class="nav-right">
+          <button type="button" class="theme-toggle" data-action="toggle-theme" aria-label="Wissel naar licht thema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">🌙</span></button>
+          <button type="button" class="btn btn-primary btn-sm" data-action="open-login">Inloggen</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="hbg">
+        <div class="ctr fu">
+          <div class="hero-grid">
+            <div>
+              <span class="badge bo">⚡ Gemiddeld binnen 30 min iemand</span>
+              <h1 id="home-title" class="h1 mt12" tabindex="-1">Jouw klus.<br><span class="accent">De juiste vakman.</span></h1>
+              <p class="lead mt16">
+                Beschrijf je klus en de eerste beschikbare vakman in jouw buurt
+                pakt 'm op. Snel, transparant en zonder gedoe — voor zowel klant
+                als vakman.
+              </p>
+              <div class="flex fw g10 mt24">
+                <button type="button" class="btn btn-primary" data-action="open-register-client">Klus plaatsen</button>
+                <button type="button" class="btn btn-outline" data-go="sc-services">Bekijk diensten</button>
+              </div>
+
+              <div class="stat-grid mt32" aria-label="Statistieken">
+                <div class="stat-box">
+                  <div class="stat-num" data-counter="12450" data-suffix="+">12.450+</div>
+                  <div class="stat-lbl">Klussen</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-num" data-counter="2400" data-suffix="">2.400</div>
+                  <div class="stat-lbl">Vakmannen</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-num">4,8★</div>
+                  <div class="stat-lbl">Gemiddeld</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-illu" aria-hidden="true">
+              <svg viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="">
+                <defs>
+                  <linearGradient id="hg1" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0" stop-color="#F97316"/>
+                    <stop offset="1" stop-color="#FB923C"/>
+                  </linearGradient>
+                  <linearGradient id="hg2" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#1F232B"/>
+                    <stop offset="1" stop-color="#15161A"/>
+                  </linearGradient>
+                  <linearGradient id="hg3" x1="0" x2="1" y1="0" y2="0">
+                    <stop offset="0" stop-color="#FB923C" stop-opacity="0.4"/>
+                    <stop offset="1" stop-color="#F97316" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- soft glow disk -->
+                <circle cx="240" cy="240" r="200" fill="url(#hg1)" opacity="0.10"/>
+                <circle cx="360" cy="120" r="64" fill="url(#hg3)" opacity="0.55"/>
+
+                <!-- house silhouette -->
+                <g transform="translate(80,150)">
+                  <rect x="0" y="60" width="320" height="190" rx="14" fill="url(#hg2)" stroke="#2C2F37" stroke-width="2"/>
+                  <path d="M-12 64 L160 -16 L332 64 L160 18 Z" fill="url(#hg1)"/>
+                  <rect x="44" y="120" width="64" height="64" rx="8" fill="#0B0B0E" stroke="#2C2F37" stroke-width="2"/>
+                  <rect x="138" y="170" width="44" height="80" rx="6" fill="#F97316"/>
+                  <rect x="212" y="120" width="64" height="64" rx="8" fill="#0B0B0E" stroke="#2C2F37" stroke-width="2"/>
+                  <line x1="76" y1="120" x2="76" y2="184" stroke="#2C2F37" stroke-width="2"/>
+                  <line x1="44" y1="152" x2="108" y2="152" stroke="#2C2F37" stroke-width="2"/>
+                  <line x1="244" y1="120" x2="244" y2="184" stroke="#2C2F37" stroke-width="2"/>
+                  <line x1="212" y1="152" x2="276" y2="152" stroke="#2C2F37" stroke-width="2"/>
+                </g>
+
+                <!-- floating wrench badge -->
+                <g class="float" transform="translate(330,80)">
+                  <circle cx="40" cy="40" r="40" fill="#F97316"/>
+                  <path transform="translate(20,20) scale(1.4)" d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1 .1-1.4z" fill="#1A0D04"/>
+                </g>
+
+                <!-- floating chat bubble -->
+                <g class="float" style="animation-delay:-2s" transform="translate(60,40)">
+                  <rect x="0" y="0" width="120" height="56" rx="20" fill="#15161A" stroke="#2C2F37" stroke-width="2"/>
+                  <circle cx="22" cy="28" r="5" fill="#F97316"/>
+                  <circle cx="42" cy="28" r="5" fill="#F97316" opacity="0.6"/>
+                  <circle cx="62" cy="28" r="5" fill="#F97316" opacity="0.3"/>
+                </g>
+
+                <!-- spark -->
+                <g transform="translate(380,360)">
+                  <path d="M0 -20 L4 -4 L20 0 L4 4 L0 20 L-4 4 L-20 0 L-4 -4 Z" fill="#F97316"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service strip -->
+      <section class="ctr" aria-labelledby="services-title">
+        <div class="flex jb ac">
+          <div>
+            <div class="sec-label">Onze diensten</div>
+            <h2 id="services-title" class="h2">Voor elke klus een vakman</h2>
+          </div>
+          <button type="button" class="btn btn-ghost" data-go="sc-services">Alle diensten →</button>
+        </div>
+        <div class="svc-strip" id="home-svc-strip" aria-label="Populaire diensten"></div>
+      </section>
+
+      <!-- How it works -->
+      <section class="ctr" id="how-it-works" aria-labelledby="how-title">
+        <div class="sec-label">Hoe het werkt</div>
+        <h2 id="how-title" class="h2">In drie stappen geregeld</h2>
+        <div class="grid-3 mt16">
+          <div class="howcard">
+            <div class="howcard__step">1</div>
+            <h3 class="h3">Plaats je klus</h3>
+            <p class="sm mt8">Beschrijf wat er moet gebeuren, in welke stad en wanneer. Voeg eventueel een richtbedrag toe.</p>
+          </div>
+          <div class="howcard">
+            <div class="howcard__step">2</div>
+            <h3 class="h3">Vakman accepteert</h3>
+            <p class="sm mt8">De eerste beschikbare vakman in de buurt pakt jouw klus op — meestal binnen 30 minuten.</p>
+          </div>
+          <div class="howcard">
+            <div class="howcard__step">3</div>
+            <h3 class="h3">Klaar &amp; betalen</h3>
+            <p class="sm mt8">Klus afgerond? Beoordeel de vakman en reken veilig af via KlusRaak.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="ctr" aria-labelledby="faq-title">
+        <div class="sec-label">Veelgestelde vragen</div>
+        <h2 id="faq-title" class="h2">Antwoorden binnen handbereik</h2>
+        <div class="faq mt16">
+          <details>
+            <summary>Wat kost het om een klus te plaatsen?</summary>
+            <div class="faq__body">Het plaatsen van een klus is gratis. Je betaalt alleen het tarief dat jij met de vakman afspreekt — KlusRaak rekent een kleine servicefee bovenop het bedrag.</div>
+          </details>
+          <details>
+            <summary>Hoe snel reageert er een vakman?</summary>
+            <div class="faq__body">Gemiddeld binnen 30 minuten. Doordat we lokaal matchen kunnen vakmannen in de buurt direct reageren op nieuwe klussen.</div>
+          </details>
+          <details>
+            <summary>Hoe betaal ik veilig?</summary>
+            <div class="faq__body">Betalen kan via iDEAL, Bancontact of creditcard. We houden het bedrag pas vrij wanneer jij bevestigt dat de klus is afgerond.</div>
+          </details>
+          <details>
+            <summary>Hoe word ik vakman op KlusRaak?</summary>
+            <div class="faq__body">Maak een vakman-account aan, vul je KvK en specialismes in en wij verifiëren je gegevens. Vaak ben je binnen 24 uur live.</div>
+          </details>
+          <details>
+            <summary>Wat als ik niet tevreden ben?</summary>
+            <div class="faq__body">Geef de vakman feedback via een review. Bij geschillen helpt ons supportteam je binnen één werkdag verder en bemiddelen we waar nodig.</div>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer" aria-label="Voettekst">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">Klus<span>Raak</span></div>
+          <p class="footer-blurb">De snelste weg naar de juiste vakman in heel Nederland. Door en voor mensen die werk maken van hun woning.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Diensten</h4>
+          <ul>
+            <li><a href="#" data-go="sc-services">Alle diensten</a></li>
+            <li><a href="#" data-action="open-register-craftsman">Word vakman</a></li>
+            <li><a href="#" data-scroll-to="#how-it-works">Hoe het werkt</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>KlusRaak</h4>
+          <ul>
+            <li><a href="#">Over ons</a></li>
+            <li><a href="#">Veelgestelde vragen</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Juridisch</h4>
+          <ul>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Algemene voorwaarden</a></li>
+            <li><a href="#">Cookies</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        © <span id="footer-year">2026</span> KlusRaak (demo) · KvK 00000000 · Gemaakt met zorg in Nederland.
+      </div>
+    </footer>
+  </section>
+
+  <!-- ============================================================
+       SERVICES (alle diensten)
+       ============================================================ -->
+  <section id="sc-services" class="sc" aria-labelledby="services-page-title">
+    <header class="app-header">
+      <div class="app-header__inner">
+        <button type="button" class="btn btn-ghost" data-go="sc-home" aria-label="Terug naar home">← Home</button>
+        <button type="button" class="logo" data-go="sc-home">Klus<span>Raak</span></button>
+        <div class="nav-right">
+          <button type="button" class="theme-toggle" data-action="toggle-theme" aria-label="Wissel thema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">🌙</span></button>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+      <div class="ctr">
+        <div class="sec-label">Diensten</div>
+        <h1 id="services-page-title" class="h2" tabindex="-1">Alle diensten</h1>
+        <p class="sm mt8">Kies de dienst die past bij jouw klus en plaats hem in een paar tikken.</p>
+
+        <div class="svc-search mt16">
+          <input type="search" id="services-search" placeholder="Zoek dienst (bv. lekkage, schilder, airco)" aria-label="Zoek een dienst" autocomplete="off" />
+        </div>
+
+        <div id="services-results" aria-live="polite"></div>
+      </div>
+    </main>
+  </section>
+
+  <!-- ============================================================
+       AUTH
+       ============================================================ -->
+  <section id="sc-auth" class="sc" aria-labelledby="auth-title">
+    <header class="app-header">
+      <div class="app-header__inner">
+        <button type="button" class="btn btn-ghost" data-go="sc-home">← Terug</button>
+        <button type="button" class="logo" data-go="sc-home">Klus<span>Raak</span></button>
+        <div class="nav-right">
+          <button type="button" class="theme-toggle" data-action="toggle-theme" aria-label="Wissel thema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">🌙</span></button>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+      <div class="ctr ctr--narrow">
+        <h1 id="auth-title" class="h2 visually-hidden" tabindex="-1">Inloggen of registreren</h1>
+        <div class="rtabs" role="tablist" aria-label="Inloggen of registreren">
+          <button type="button" class="rtab on" role="tab" aria-selected="true" aria-controls="form-login" data-tab="login">Inloggen</button>
+          <button type="button" class="rtab" role="tab" aria-selected="false" aria-controls="form-register" data-tab="register">Registreren</button>
+        </div>
+
+        <!-- Login -->
+        <form id="form-login" class="flex fc g12" role="tabpanel" novalidate>
+          <div class="fg">
+            <label for="login-email">E-mail<span class="req" aria-hidden="true">*</span></label>
+            <input type="email" id="login-email" name="email" required aria-required="true" placeholder="jij@voorbeeld.nl" autocomplete="email" />
+          </div>
+          <div class="fg">
+            <label for="login-password">Wachtwoord<span class="req" aria-hidden="true">*</span></label>
+            <div class="pw-w">
+              <input type="password" id="login-password" name="password" required aria-required="true" minlength="8" autocomplete="current-password" />
+              <button type="button" class="pw-t" data-toggle-pw aria-label="Toon wachtwoord" aria-pressed="false">👁</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full mt8">Inloggen</button>
+          <p class="sm tc">Demo: <code>klant@klusraak.nl</code> / <code>Demo1234!</code></p>
+        </form>
+
+        <!-- Register -->
+        <form id="form-register" class="flex fc g12" hidden role="tabpanel" novalidate>
+          <fieldset class="fg" style="border:0;padding:0;">
+            <legend class="visually-hidden">Kies je rol</legend>
+            <div class="og">
+              <button type="button" class="oc" data-role="CLIENT" aria-pressed="true">
+                <div class="oi" aria-hidden="true">🛠</div>
+                <div class="ol">Ik heb een klus</div>
+                <div class="os">Klant</div>
+              </button>
+              <button type="button" class="oc" data-role="CRAFTSMAN" aria-pressed="false">
+                <div class="oi" aria-hidden="true">👷</div>
+                <div class="ol">Ik ben vakman</div>
+                <div class="os">Aanbieder</div>
+              </button>
+            </div>
+          </fieldset>
+          <input type="hidden" name="role" value="CLIENT" />
+
+          <div class="fg">
+            <label for="register-name">Naam<span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="register-name" name="name" required aria-required="true" minlength="2" placeholder="Jouw naam" autocomplete="name" />
+          </div>
+          <div class="fg">
+            <label for="register-email">E-mail<span class="req" aria-hidden="true">*</span></label>
+            <input type="email" id="register-email" name="email" required aria-required="true" placeholder="jij@voorbeeld.nl" autocomplete="email" />
+          </div>
+          <div class="fg">
+            <label for="register-phone">Telefoon</label>
+            <input type="tel" id="register-phone" name="phone" placeholder="+31 6 ..." autocomplete="tel" />
+          </div>
+          <div class="fg">
+            <label for="register-password">Wachtwoord<span class="req" aria-hidden="true">*</span></label>
+            <div class="pw-w">
+              <input type="password" id="register-password" name="password" required aria-required="true" minlength="8" autocomplete="new-password" />
+              <button type="button" class="pw-t" data-toggle-pw aria-label="Toon wachtwoord" aria-pressed="false">👁</button>
+            </div>
+            <span class="field-hint">Minimaal 8 tekens.</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full mt8">Account aanmaken</button>
+        </form>
+      </div>
+    </main>
+  </section>
+
+  <!-- ============================================================
+       DASHBOARD
+       ============================================================ -->
+  <section id="sc-dash" class="sc" aria-labelledby="dash-title">
+    <header class="app-header">
+      <div class="app-header__inner">
+        <button type="button" class="logo" data-go="sc-dash">Klus<span>Raak</span></button>
+        <nav class="nav-links" aria-label="Hoofdnavigatie">
+          <button type="button" class="nav-link" data-go="sc-dash" aria-current="page">Home</button>
+          <button type="button" class="nav-link" data-go="sc-jobs">Klussen</button>
+          <button type="button" class="nav-link" data-go="sc-services">Diensten</button>
+          <button type="button" class="nav-link" data-go="sc-profile">Profiel</button>
+        </nav>
+        <div class="nav-right">
+          <button type="button" class="theme-toggle" data-action="toggle-theme" aria-label="Wissel thema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">🌙</span></button>
+          <button type="button" class="btn btn-ghost" data-action="logout">Uitloggen</button>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+      <div class="ctr" id="dash-body">
+        <h1 id="dash-title" class="visually-hidden" tabindex="-1">Dashboard</h1>
+      </div>
+    </main>
+    <nav class="bnav" aria-label="Snelnavigatie">
+      <button type="button" class="bni" data-go="sc-dash" aria-current="page" aria-label="Home"><span class="ico" aria-hidden="true">🏠</span>Home</button>
+      <button type="button" class="bni" data-go="sc-jobs" aria-label="Mijn klussen"><span class="ico" aria-hidden="true">📋</span>Klussen</button>
+      <button type="button" class="bni" data-go="sc-services" aria-label="Alle diensten"><span class="ico" aria-hidden="true">🧰</span>Diensten</button>
+      <button type="button" class="bni" data-go="sc-profile" aria-label="Profiel"><span class="ico" aria-hidden="true">👤</span>Profiel</button>
+    </nav>
+  </section>
+
+  <!-- ============================================================
+       JOBS LIST (role-aware)
+       ============================================================ -->
+  <section id="sc-jobs" class="sc" aria-labelledby="jobs-title">
+    <header class="app-header">
+      <div class="app-header__inner">
+        <button type="button" class="btn btn-ghost" data-go="sc-dash" aria-label="Terug naar home">← Home</button>
+        <button type="button" class="logo" data-go="sc-dash">Klus<span>Raak</span></button>
+        <div class="nav-right">
+          <button type="button" class="theme-toggle" data-action="toggle-theme" aria-label="Wissel thema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">🌙</span></button>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+      <div class="ctr">
+        <h1 class="h2" id="jobs-title" tabindex="-1">Mijn klussen</h1>
+        <div class="chips mt12" id="jobs-chips" role="toolbar" aria-label="Filter op categorie"></div>
+        <div class="grid-2 mt16" id="jobs-list" aria-live="polite"></div>
+      </div>
+    </main>
+    <nav class="bnav" aria-label="Snelnavigatie">
+      <button type="button" class="bni" data-go="sc-dash" aria-label="Home"><span class="ico" aria-hidden="true">🏠</span>Home</button>
+      <button type="button" class="bni" data-go="sc-jobs" aria-current="page" aria-label="Mijn klussen"><span class="ico" aria-hidden="true">📋</span>Klussen</button>
+      <button type="button" class="bni" data-go="sc-services" aria-label="Alle diensten"><span class="ico" aria-hidden="true">🧰</span>Diensten</button>
+      <button type="button" class="bni" data-go="sc-profile" aria-label="Profiel"><span class="ico" aria-hidden="true">👤</span>Profiel</button>
+    </nav>
+  </section>
+
+  <!-- ============================================================
+       NEW JOB
+       ============================================================ -->
+  <section id="sc-new" class="sc" aria-labelledby="new-title">
+    <header class="app-header">
+      <div class="app-header__inner">
+        <button type="button" class="btn btn-ghost" data-go="sc-dash">← Terug</button>
+        <button type="button" class="logo" data-go="sc-dash">Klus<span>Raak</span></button>
+        <div class="nav-right">
+          <button type="button" class="theme-toggle" data-action="toggle-theme" aria-label="Wissel thema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">🌙</span></button>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+      <div class="ctr ctr--narrow">
+        <h1 id="new-title" class="h2" tabindex="-1">Nieuwe klus</h1>
+        <p class="sm mt8">Beschrijf je klus zo concreet mogelijk — dat helpt vakmannen sneller te reageren.</p>
+        <form id="form-new-job" class="flex fc g12 mt16" novalidate>
+          <div class="fg">
+            <label for="newjob-category">Categorie<span class="req" aria-hidden="true">*</span></label>
+            <select id="newjob-category" name="categoryId" required aria-required="true"></select>
+          </div>
+          <div class="fg">
+            <label for="newjob-title">Titel<span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="newjob-title" name="title" required aria-required="true" minlength="4" maxlength="120" placeholder="Bijv. Stopcontact vervangen" />
+          </div>
+          <div class="fg">
+            <label for="newjob-description">Beschrijving<span class="req" aria-hidden="true">*</span></label>
+            <textarea id="newjob-description" name="description" required aria-required="true" minlength="10" maxlength="5000" rows="4" placeholder="Wat moet er gebeuren?"></textarea>
+          </div>
+          <div class="fg">
+            <label for="newjob-city">Stad<span class="req" aria-hidden="true">*</span></label>
+            <input type="text" id="newjob-city" name="city" required aria-required="true" placeholder="Amsterdam" />
+          </div>
+          <div class="fg">
+            <label for="newjob-postcode">Postcode</label>
+            <input type="text" id="newjob-postcode" name="postcode" placeholder="1011AB" autocomplete="postal-code" />
+          </div>
+          <div class="fg">
+            <label for="newjob-budget">Budget (€, optioneel)</label>
+            <input type="number" id="newjob-budget" name="budgetEuro" min="0" step="1" placeholder="bijv. 75" inputmode="numeric" />
+          </div>
+          <button type="submit" class="btn btn-primary btn-full mt8">Klus plaatsen</button>
+        </form>
+      </div>
+    </main>
+  </section>
+
+  <!-- ============================================================
+       JOB DETAIL
+       ============================================================ -->
+  <section id="sc-job" class="sc" aria-labelledby="job-title">
+    <header class="app-header">
+      <div class="app-header__inner">
+        <button type="button" class="btn btn-ghost" data-go="sc-jobs">← Klussen</button>
+        <button type="button" class="logo" data-go="sc-dash">Klus<span>Raak</span></button>
+        <div class="nav-right">
+          <button type="button" class="theme-toggle" data-action="toggle-theme" aria-label="Wissel thema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">🌙</span></button>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+      <div class="ctr ctr--narrow" id="job-body">
+        <h1 id="job-title" class="visually-hidden" tabindex="-1">Klus</h1>
+      </div>
+    </main>
+  </section>
+
+  <!-- ============================================================
+       CHAT
+       ============================================================ -->
+  <section id="sc-chat" class="sc" aria-labelledby="chat-title">
+    <header class="app-header">
+      <div class="app-header__inner">
+        <button type="button" class="btn btn-ghost" data-action="back-to-job">← Klus</button>
+        <h1 id="chat-title" class="logo" tabindex="-1">Chat</h1>
+        <div class="nav-right">
+          <button type="button" class="theme-toggle" data-action="toggle-theme" aria-label="Wissel thema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">🌙</span></button>
+        </div>
+      </div>
+    </header>
+    <main id="main" class="flex fc" style="flex:1;">
+      <div class="chat-ctr flex fc g8" id="chat-thread" aria-live="polite" aria-relevant="additions"></div>
+      <button type="button" id="chat-new-pill" class="chat-new-pill" hidden>Nieuwe berichten ↓</button>
+      <form id="chat-form" class="chat-input-row" novalidate>
+        <label for="chat-input" class="visually-hidden">Bericht</label>
+        <input type="text" id="chat-input" name="content" placeholder="Bericht..." autocomplete="off" required aria-required="true" />
+        <button type="submit" class="btn btn-primary btn-sm">Stuur</button>
+      </form>
+    </main>
+  </section>
+
+  <!-- ============================================================
+       PROFILE
+       ============================================================ -->
+  <section id="sc-profile" class="sc" aria-labelledby="profile-title">
+    <header class="app-header">
+      <div class="app-header__inner">
+        <button type="button" class="btn btn-ghost" data-go="sc-dash">← Home</button>
+        <button type="button" class="logo" data-go="sc-dash">Klus<span>Raak</span></button>
+        <div class="nav-right">
+          <button type="button" class="theme-toggle" data-action="toggle-theme" aria-label="Wissel thema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">🌙</span></button>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+      <div class="ctr ctr--narrow" id="profile-body">
+        <h1 id="profile-title" class="visually-hidden" tabindex="-1">Profiel</h1>
+      </div>
+    </main>
+    <nav class="bnav" aria-label="Snelnavigatie">
+      <button type="button" class="bni" data-go="sc-dash" aria-label="Home"><span class="ico" aria-hidden="true">🏠</span>Home</button>
+      <button type="button" class="bni" data-go="sc-jobs" aria-label="Mijn klussen"><span class="ico" aria-hidden="true">📋</span>Klussen</button>
+      <button type="button" class="bni" data-go="sc-services" aria-label="Alle diensten"><span class="ico" aria-hidden="true">🧰</span>Diensten</button>
+      <button type="button" class="bni" data-go="sc-profile" aria-current="page" aria-label="Profiel"><span class="ico" aria-hidden="true">👤</span>Profiel</button>
+    </nav>
+  </section>
+
+  <script src="js/favicon.js" defer></script>
+  <script src="js/config.js"></script>
+  <script src="js/demo/mock-store.js"></script>
+  <script src="js/demo/mock-data.js"></script>
+  <script src="js/demo/mock-api.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/screens.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
