@@ -1,8 +1,11 @@
 name: Deploy demo to GitHub Pages
 
-# Pushes a build of frontend/public to the gh-pages branch and asks the
-# Pages action to enable Pages on the repo if it isn't yet. Avoids the
-# Settings → Pages click step on a fresh repo.
+# Publishes klusraak/frontend/public to the gh-pages branch. Using the
+# branch-based publish (peaceiris/actions-gh-pages) instead of
+# actions/deploy-pages because the latter requires the auto-created
+# `github-pages` environment to allow this branch — which it doesn't by
+# default. This approach pushes directly to gh-pages and works as long
+# as the repo's Pages source is set to "Deploy from a branch: gh-pages".
 
 on:
   push:
@@ -14,9 +17,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
@@ -25,23 +26,18 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure Pages (enable if needed)
-        uses: actions/configure-pages@v5
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          enablement: true
-
-      - name: Upload demo artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: klusraak/frontend/public
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: klusraak/frontend/public
+          publish_branch: gh-pages
+          force_orphan: true
+          cname: ''
+          user_name: 'github-actions[bot]'
+          user_email: '41898282+github-actions[bot]@users.noreply.github.com'
+          commit_message: 'deploy: publish demo from ${{ github.sha }}'
