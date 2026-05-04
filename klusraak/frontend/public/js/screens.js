@@ -7,7 +7,7 @@
   const {
     escape, fmtMoney, fmtDate, initials,
     toast, jobCard, skeletonList, emptyState, friendlyError, submitLock,
-    confirm: confirmDialog, animateCounters,
+    confirm: confirmDialog, animateCounters, refreshIcons,
     STATUS_LABELS, STATUS_BADGE,
   } = window.KR.utils;
   const { validate, clearFieldErrors } = window.KR.forms;
@@ -191,10 +191,11 @@
 
     if (groups.length === 0) {
       out.innerHTML = emptyState({
-        icon: '🔎',
+        icon: 'search-x',
         title: 'Geen dienst gevonden',
         body: q ? `We konden geen dienst vinden voor "${escape(q)}".` : 'Probeer een ander zoekwoord.',
       });
+      refreshIcons();
       return;
     }
 
@@ -224,6 +225,7 @@
         `;
       })
       .join('');
+    refreshIcons();
   }
 
   function onEnterServices() {
@@ -262,10 +264,10 @@
 
     body.innerHTML = `
       <h1 class="visually-hidden" tabindex="-1">Dashboard</h1>
-      <div class="hbg" style="padding:28px;border-radius:var(--r-lg);overflow:hidden;position:relative;border:1px solid var(--hairline);">
+      <div class="hbg" style="padding:28px;border-radius:var(--radius-xl);overflow:hidden;position:relative;border:1px solid var(--line-2);box-shadow:var(--shadow-sm),var(--rim-light);">
         <div style="position:relative;z-index:1;">
           <span class="badge bo">${user.role === 'CLIENT' ? 'Klant' : 'Vakman'}</span>
-          <h2 class="h2 mt12">Hoi ${escape(user.name.split(' ')[0])} 👋</h2>
+          <h2 class="h2 mt12">Hoi ${escape(user.name.split(' ')[0])}.</h2>
           <p class="lead mt8">${
             user.role === 'CLIENT'
               ? 'Klaar om een klus uit te zetten? We vinden binnen 30 min een vakman.'
@@ -274,7 +276,7 @@
           <div class="flex fw g10 mt16">
             ${
               user.role === 'CLIENT'
-                ? '<button type="button" class="btn btn-primary" data-go="sc-new">+ Nieuwe klus</button><button type="button" class="btn btn-outline" data-go="sc-services">Bekijk diensten</button>'
+                ? '<button type="button" class="btn btn-primary" data-go="sc-new"><i data-lucide="plus"></i>Nieuwe klus</button><button type="button" class="btn btn-outline" data-go="sc-services">Bekijk diensten</button>'
                 : '<button type="button" class="btn btn-primary" data-go="sc-jobs">Open klussen</button>'
             }
           </div>
@@ -284,6 +286,7 @@
       <div class="sec-label mt32">Recent</div>
       <div class="grid-2" id="dash-recent">${skeletonList(3)}</div>
     `;
+    refreshIcons();
 
     try {
       const { jobs } = await window.API.listMyJobs();
@@ -292,7 +295,7 @@
       list.innerHTML =
         recent.length === 0
           ? emptyState({
-              icon: user.role === 'CLIENT' ? '📭' : '🧰',
+              icon: user.role === 'CLIENT' ? 'inbox' : 'briefcase',
               title: user.role === 'CLIENT' ? 'Nog geen klussen' : 'Nog geen actieve klussen',
               body:
                 user.role === 'CLIENT'
@@ -302,12 +305,14 @@
               onAction: () => window.Router.go(user.role === 'CLIENT' ? 'sc-new' : 'sc-jobs'),
             })
           : recent.map((j) => jobCard(j)).join('');
+      refreshIcons();
     } catch (err) {
       $('#dash-recent').innerHTML = emptyState({
-        icon: '⚠️',
+        icon: 'alert-triangle',
         title: 'Klussen niet geladen',
         body: friendlyError(err),
       });
+      refreshIcons();
     }
   }
 
@@ -354,7 +359,7 @@
       const jobs = isCraftsman ? data.items : data.jobs;
       if (!jobs || jobs.length === 0) {
         list.innerHTML = emptyState({
-          icon: isCraftsman ? '🔍' : '📋',
+          icon: isCraftsman ? 'search-x' : 'list-checks',
           title: isCraftsman ? 'Geen open klussen' : 'Nog geen klussen geplaatst',
           body: isCraftsman
             ? 'Probeer een andere categorie of kijk later opnieuw.'
@@ -362,15 +367,17 @@
           actionLabel: isCraftsman ? null : 'Nieuwe klus',
           onAction: isCraftsman ? null : () => window.Router.go('sc-new'),
         });
+        refreshIcons();
         return;
       }
       list.innerHTML = jobs.map((j) => jobCard(j)).join('');
     } catch (err) {
       list.innerHTML = emptyState({
-        icon: '⚠️',
+        icon: 'alert-triangle',
         title: 'Klussen niet geladen',
         body: friendlyError(err),
       });
+      refreshIcons();
     }
   }
 
@@ -436,12 +443,13 @@
     const body = $('#job-body');
     if (!id) {
       body.innerHTML = emptyState({
-        icon: '📭',
+        icon: 'inbox',
         title: 'Geen klus geselecteerd',
         body: 'Kies een klus uit de lijst.',
         actionLabel: 'Naar klussen',
         onAction: () => window.Router.go('sc-jobs'),
       });
+      refreshIcons();
       return;
     }
     body.innerHTML = '<h1 class="visually-hidden" tabindex="-1">Klus details</h1>' + skeletonList(3);
@@ -466,7 +474,7 @@
         actions.push('<button type="button" class="btn btn-danger btn-full" data-act="cancel">Annuleer klus</button>');
       }
       if (job.assignment && (isClient || isAssignedCraftsman)) {
-        actions.unshift('<button type="button" class="btn btn-secondary btn-full" data-act="chat" aria-label="Chat openen">💬 Chat openen</button>');
+        actions.unshift('<button type="button" class="btn btn-secondary btn-full" data-act="chat" aria-label="Chat openen"><i data-lucide="message-circle"></i>Chat openen</button>');
       }
 
       let reviewBlock = '';
@@ -522,6 +530,7 @@
         <div class="flex fc g8 mt16">${actions.join('')}</div>
         ${reviewBlock}
       `;
+      refreshIcons();
 
       body.querySelectorAll('[data-act]').forEach((btn) =>
         btn.addEventListener('click', async () => {
@@ -578,11 +587,13 @@
       }
     } catch (err) {
       body.innerHTML = emptyState({
-        icon: '⚠️',
+        icon: 'alert-triangle',
         title: 'Klus niet geladen',
         body: friendlyError(err),
       });
+      refreshIcons();
     }
+    refreshIcons();
   }
 
   /* -------------------- CHAT -------------------- */
@@ -614,10 +625,11 @@
     const newPill = $('#chat-new-pill');
     if (!id) {
       thread.innerHTML = emptyState({
-        icon: '💬',
+        icon: 'message-circle',
         title: 'Geen klus geselecteerd',
         body: 'Open eerst een klus om te chatten.',
       });
+      refreshIcons();
       return;
     }
 
@@ -640,7 +652,7 @@
                 </div>
               </div>`;
           })
-          .join('') || '<div class="empty-state"><div class="empty-state__icon">💬</div><h3 class="empty-state__title">Begin een gesprek</h3><p class="empty-state__body">Stel je vraag of laat een update achter.</p></div>';
+          .join('') || '<div class="empty-state"><div class="empty-state__icon" aria-hidden="true"><i data-lucide="message-circle"></i></div><h3 class="empty-state__title">Begin een gesprek</h3><p class="empty-state__body">Stel je vraag of laat een update achter.</p></div>';
 
         const grew = messages.length > lastCount;
         lastCount = messages.length;
@@ -650,12 +662,14 @@
         } else if (grew && newPill) {
           newPill.hidden = false;
         }
+        refreshIcons();
       } catch (err) {
         thread.innerHTML = emptyState({
-          icon: '⚠️',
+          icon: 'alert-triangle',
           title: 'Chat niet geladen',
           body: friendlyError(err),
         });
+        refreshIcons();
       }
     };
 

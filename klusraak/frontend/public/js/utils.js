@@ -112,6 +112,16 @@
     if (el) el.classList.remove('on');
   }
 
+  /* ---------------- Lucide icon refresh ---------------- */
+
+  // Lucide is loaded via CDN at end of body. Calling createIcons() walks
+  // the DOM for `<i data-lucide="...">` and swaps in inline SVGs. Safe to
+  // call repeatedly — already-rendered icons are skipped.
+  function refreshIcons() {
+    if (typeof window.lucide?.createIcons !== 'function') return;
+    try { window.lucide.createIcons(); } catch (_) { /* no-op */ }
+  }
+
   /* ---------------- Skeletons ---------------- */
 
   function skeletonList(n = 3) {
@@ -130,11 +140,11 @@
 
   /* ---------------- Empty state ---------------- */
 
-  function emptyState({ icon = '📭', title = '', body = '', actionLabel, onAction } = {}) {
+  function emptyState({ icon = 'package', title = '', body = '', actionLabel, onAction } = {}) {
     const id = 'empty-' + Math.random().toString(36).slice(2, 8);
     const html = `
       <div class="empty-state">
-        <div class="empty-state__icon" aria-hidden="true">${escape(icon)}</div>
+        <div class="empty-state__icon" aria-hidden="true"><i data-lucide="${escape(icon)}"></i></div>
         ${title ? `<h3 class="empty-state__title">${escape(title)}</h3>` : ''}
         ${body ? `<p class="empty-state__body">${escape(body)}</p>` : ''}
         ${
@@ -432,12 +442,27 @@
     if (persist) localStorage.setItem('klusraak.theme', theme);
     document.querySelectorAll('[data-action="toggle-theme"]').forEach((btn) => {
       btn.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
-      btn.querySelector('.theme-icon').textContent = theme === 'light' ? '☀️' : '🌙';
       btn.setAttribute(
         'aria-label',
         theme === 'light' ? 'Wissel naar donker thema' : 'Wissel naar licht thema',
       );
+      // Replace the icon: native <i data-lucide=...> first, then any
+      // already-rendered <svg> with class lucide- so we cover both states.
+      const lucideName = theme === 'light' ? 'sun' : 'moon';
+      let icon = btn.querySelector('[data-lucide]');
+      if (icon) {
+        icon.setAttribute('data-lucide', lucideName);
+      } else {
+        // Lucide already swapped <i> for <svg>; replace the svg with a fresh <i>.
+        const svg = btn.querySelector('svg');
+        if (svg) {
+          const i = document.createElement('i');
+          i.setAttribute('data-lucide', lucideName);
+          svg.replaceWith(i);
+        }
+      }
     });
+    refreshIcons();
   }
 
   function toggleTheme() {
@@ -485,6 +510,7 @@
     focusFirstHeading, announceRoute, bindRovingTabindex,
     animateCounters,
     setTheme, toggleTheme,
+    refreshIcons,
     jobCard,
     STATUS_LABELS, STATUS_BADGE,
   };

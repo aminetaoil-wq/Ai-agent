@@ -56,13 +56,14 @@
       // Notify screen handlers (re-fetch data).
       window.dispatchEvent(new CustomEvent('screen:enter', { detail: { id, payload } }));
 
-      // Move focus to the screen heading and announce route to SR.
+      // Move focus to the screen heading, announce route to SR, refresh
+      // any Lucide icons that may have been added since last render.
       const utils = window.KR?.utils;
       if (utils) {
-        // requestAnimationFrame ensures the screen is painted before focus.
         requestAnimationFrame(() => {
           utils.focusFirstHeading(target);
           utils.announceRoute(SCREEN_LABELS[id] || id);
+          utils.refreshIcons?.();
         });
       }
     },
